@@ -28,6 +28,7 @@ const eslintConfig = defineConfig([
         },
     },
     globalIgnores([
+        ".next/**",
         "**/*.js",
         "**/*.config.ts",
         "config/*.js",
