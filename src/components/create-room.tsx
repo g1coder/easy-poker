@@ -1,6 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import {
+    Box,
+    TextField,
+    Button,
+    Typography,
+    Container,
+    CircularProgress,
+} from "@mui/material";
 
 interface CreateRoomProps {
     onRoomCreated: (roomId: string, roomName: string, userId: string) => void;
@@ -18,7 +26,7 @@ export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
         setIsCreating(true);
 
         try {
-            const roomId = `room-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+            const roomId = `room-${Date.now()}-${Math.random().toString(36)}`;
 
             const response = await fetch("/api/rooms", {
                 method: "POST",
@@ -29,7 +37,7 @@ export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
                     roomId,
                     roomName: roomName.trim(),
                     ownerName: ownerName.trim(),
-                    cards: [0, 1, 2, 3, 5, 8, 13, 21],
+                    cards: [0, 1, 2, 3, 5, 8, 13, 21, Infinity],
                 }),
             });
 
@@ -49,91 +57,68 @@ export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
     };
 
     return (
-        <div
-            style={{ maxWidth: "400px", margin: "50px auto", padding: "20px" }}
-        >
-            <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
-                Create Planning Poker Room
-            </h1>
+        <Container maxWidth="sm">
+            <Box textAlign="center" maxWidth="sm">
+                <Typography
+                    component="h1"
+                    variant="h4"
+                    gutterBottom
+                    fontWeight={500}
+                >
+                    Create Planning Poker Room
+                </Typography>
 
-            <form
-                onSubmit={handleSubmit}
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "15px",
-                }}
-            >
-                <div>
-                    <label
-                        style={{
-                            display: "block",
-                            marginBottom: "5px",
-                            fontWeight: "bold",
-                        }}
-                    >
-                        Your Name:
-                    </label>
-                    <input
-                        type="text"
+                <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    sx={{ mt: 1, width: "100%" }}
+                >
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="Your Name"
+                        name="ownerName"
+                        autoComplete="name"
+                        autoFocus
                         value={ownerName}
                         onChange={(e) => setOwnerName(e.target.value)}
                         placeholder="Enter your name"
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px",
-                            fontSize: "16px",
-                        }}
-                        required
                     />
-                </div>
 
-                <div>
-                    <label
-                        style={{
-                            display: "block",
-                            marginBottom: "5px",
-                            fontWeight: "bold",
-                        }}
-                    >
-                        Room Name:
-                    </label>
-                    <input
-                        type="text"
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="Room Name"
+                        name="roomName"
+                        autoComplete="off"
                         value={roomName}
                         onChange={(e) => setRoomName(e.target.value)}
                         placeholder="Enter room name"
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px",
-                            fontSize: "16px",
-                        }}
-                        required
                     />
-                </div>
 
-                <button
-                    type="submit"
-                    disabled={
-                        isCreating || !roomName.trim() || !ownerName.trim()
-                    }
-                    style={{
-                        padding: "12px",
-                        backgroundColor: isCreating ? "#ccc" : "#007bff",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        fontSize: "16px",
-                        cursor: isCreating ? "not-allowed" : "pointer",
-                    }}
-                >
-                    {isCreating ? "Creating..." : "Create Room"}
-                </button>
-            </form>
-        </div>
+                    <Button
+                        fullWidth
+                        type="submit"
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2 }}
+                        disabled={
+                            isCreating || !roomName.trim() || !ownerName.trim()
+                        }
+                        size="large"
+                    >
+                        {isCreating ? (
+                            <>
+                                <CircularProgress size={20} sx={{ mr: 1 }} />
+                                Creating...
+                            </>
+                        ) : (
+                            "Create Room"
+                        )}
+                    </Button>
+                </Box>
+            </Box>
+        </Container>
     );
 }

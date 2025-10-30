@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import { Box, Button, Container, TextField, Typography } from "@mui/material";
 
 interface JoinRoomProps {
-    roomId: string;
-    onJoined: (userId: string, userName: string) => void;
+    onJoined: (roomId: string, userId: string, userName: string) => void;
 }
 
-export default function JoinRoom({ roomId, onJoined }: JoinRoomProps) {
+export default function JoinRoom({ onJoined }: JoinRoomProps) {
     const [userName, setUserName] = useState("");
+    const [roomId, setRoomId] = useState("");
     const [isJoining, setIsJoining] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -31,7 +32,7 @@ export default function JoinRoom({ roomId, onJoined }: JoinRoomProps) {
             const data = await response.json();
 
             if (data.success) {
-                onJoined(data.userId, userName.trim());
+                onJoined(roomId, data.userId, userName.trim());
             } else {
                 alert("Error joining room: " + data.error);
             }
@@ -44,66 +45,56 @@ export default function JoinRoom({ roomId, onJoined }: JoinRoomProps) {
     };
 
     return (
-        <div
-            style={{ maxWidth: "400px", margin: "50px auto", padding: "20px" }}
-        >
-            <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
-                Join Planning Poker
-            </h1>
-            <p style={{ textAlign: "center", marginBottom: "20px" }}>
-                Room: {roomId}
-            </p>
-
-            <form
+        <Container maxWidth="sm">
+            <Box textAlign="center" maxWidth="sm">
+                <Typography
+                    component="h1"
+                    variant="h4"
+                    gutterBottom
+                    fontWeight={500}
+                >
+                    Join Planning Poker
+                </Typography>
+            </Box>
+            <Box
+                component="form"
                 onSubmit={handleSubmit}
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "15px",
-                }}
+                sx={{ mt: 1, width: "100%" }}
             >
-                <div>
-                    <label
-                        style={{
-                            display: "block",
-                            marginBottom: "5px",
-                            fontWeight: "bold",
-                        }}
-                    >
-                        Your Name:
-                    </label>
-                    <input
-                        type="text"
-                        value={userName}
-                        onChange={(e) => setUserName(e.target.value)}
-                        placeholder="Enter your name"
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            border: "1px solid #ccc",
-                            borderRadius: "4px",
-                            fontSize: "16px",
-                        }}
-                        required
-                    />
-                </div>
-
-                <button
+                <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    label="Room Id"
+                    name="roomId"
+                    autoFocus
+                    value={roomId}
+                    onChange={(e) => setRoomId(e.target.value?.trim())}
+                    placeholder="Enter room ID"
+                />
+                <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    label="Your Name"
+                    name="userName"
+                    autoComplete="name"
+                    autoFocus
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Enter your name"
+                />
+                <Button
+                    fullWidth
                     type="submit"
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
                     disabled={isJoining || !userName.trim()}
-                    style={{
-                        padding: "12px",
-                        backgroundColor: isJoining ? "#ccc" : "#28a745",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        fontSize: "16px",
-                        cursor: isJoining ? "not-allowed" : "pointer",
-                    }}
+                    size="large"
                 >
                     {isJoining ? "Joining..." : "Join Room"}
-                </button>
-            </form>
-        </div>
+                </Button>
+            </Box>
+        </Container>
     );
 }

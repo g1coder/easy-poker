@@ -4,6 +4,7 @@ import { useState } from "react";
 import PokerRoom from "@components/poker-room";
 import JoinRoom from "@components/join-room";
 import CreateRoom from "@components/create-room";
+import { Box, Button, Container } from "@mui/material";
 
 type AppState = "create" | "join" | "room";
 
@@ -24,7 +25,12 @@ export default function Home() {
         setAppState("room");
     };
 
-    const handleJoined = (newUserId: string, newUserName: string) => {
+    const handleJoined = (
+        roomId: string,
+        newUserId: string,
+        newUserName: string
+    ) => {
+        setRoomId(roomId);
         setUserId(newUserId);
         setUserName(newUserName);
         setAppState("room");
@@ -65,55 +71,43 @@ export default function Home() {
         );
     }
 
-    if (appState === "join") {
-        return (
-            <div>
-                <button
-                    onClick={() => setAppState("create")}
-                    style={{
-                        position: "absolute",
-                        top: "20px",
-                        left: "20px",
-                        padding: "8px 16px",
-                        backgroundColor: "#6c757d",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                    }}
-                >
-                    ← Back
-                </button>
-                <JoinRoom roomId={roomId} onJoined={handleJoined} />
-            </div>
-        );
-    }
-
     return (
-        <div>
-            <CreateRoom onRoomCreated={handleRoomCreated} />
+        <Container
+            component="main"
+            sx={{
+                display: "flex",
+                alignItems: "center",
+                height: "100%",
+            }}
+        >
+            <Box sx={{ width: "100%" }}>
+                {appState === "create" && (
+                    <CreateRoom
+                        key="create"
+                        onRoomCreated={handleRoomCreated}
+                    />
+                )}
+                {appState === "join" && (
+                    <JoinRoom key="join" onJoined={handleJoined} />
+                )}
 
-            <div style={{ textAlign: "center", marginTop: "30px" }}>
-                <button
-                    onClick={() => {
-                        const roomId = prompt("Enter room ID:");
-                        if (roomId) {
-                            setRoomId(roomId);
-                            setAppState("join");
-                        }
-                    }}
-                    style={{
-                        padding: "10px 20px",
-                        backgroundColor: "transparent",
-                        color: "#007bff",
-                        border: "1px solid #007bff",
-                        borderRadius: "4px",
-                        cursor: "pointer",
-                    }}
-                >
-                    Join Existing Room
-                </button>
-            </div>
-        </div>
+                <Box sx={{ textAlign: "center" }}>
+                    <Button
+                        variant="outlined"
+                        sx={{ mt: 3, mb: 2 }}
+                        size="large"
+                        onClick={() => {
+                            setAppState((prev) =>
+                                prev === "create" ? "join" : "create"
+                            );
+                        }}
+                    >
+                        {appState !== "create"
+                            ? "Create new Room"
+                            : "Join Existing Room"}
+                    </Button>
+                </Box>
+            </Box>
+        </Container>
     );
 }
