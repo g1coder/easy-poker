@@ -1,7 +1,8 @@
 {
     "name": "easy-poker",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "private": true,
+    "homepage": "https://g1coder.github.io/easy-poker",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -9,7 +10,8 @@
         "lint": "eslint . && npm run lint:css",
         "lint:css": "stylelint **/*.{css,scss,sass}",
         "format": "prettier **/*.{ts,tsx,md,json,js,jsx,css,scss} --write",
-        "prepare": "husky"
+        "prepare": "husky",
+        "export": "next build && next export"
     },
     "dependencies": {
         "@emotion/react": "11.14.0",
