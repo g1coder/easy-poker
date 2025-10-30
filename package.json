@@ -3,13 +3,13 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "dev": "next dev",
+        "dev": "node src/server.js",
         "build": "next build",
-        "start": "next start",
         "lint": "eslint . && npm run lint:css",
         "lint:css": "stylelint **/*.{css,scss,sass}",
         "format": "prettier **/*.{ts,tsx,md,json,js,jsx,css,scss} --write",
-        "prepare": "husky"
+        "prepare": "husky",
+        "start": "node src/server.js"
     },
     "dependencies": {
         "@emotion/react": "11.14.0",
@@ -18,12 +18,14 @@
         "axios": "1.12.2",
         "next": "16.0.0",
         "react": "19.2.0",
-        "react-dom": "19.2.0"
+        "react-dom": "19.2.0",
+        "socket.io": "^4.8.1",
+        "socket.io-client": "^4.8.1"
     },
     "devDependencies": {
         "@eslint/eslintrc": "3.3.1",
         "@eslint/js": "^9.38.0",
-        "@types/node": "20",
+        "@types/node": "^20.19.24",
         "@types/react": "19.2.2",
         "@types/react-dom": "19.2.2",
         "eslint": "^9.38.0",

@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { CreateRoom } from "@components/create-room";
+import { Room } from "@components/room";
 
 export default function Home() {
     return (
@@ -13,7 +13,7 @@ export default function Home() {
                     height: "100vh",
                 }}
             >
-                <CreateRoom />
+                <Room />
             </Box>
         </main>
     );
