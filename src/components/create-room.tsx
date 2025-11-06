@@ -9,15 +9,15 @@ import {
     Container,
     CircularProgress,
 } from "@mui/material";
+import { api } from "@/api";
+import { useRouter } from "next/navigation";
+import { Room } from "@/types";
 
-interface CreateRoomProps {
-    onRoomCreated: (roomId: string, roomName: string, userId: string) => void;
-}
-
-export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
+export const CreateRoom = () => {
     const [roomName, setRoomName] = useState("");
     const [ownerName, setOwnerName] = useState("");
     const [isCreating, setIsCreating] = useState(false);
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,30 +26,13 @@ export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
         setIsCreating(true);
 
         try {
-            const roomId = `room-${Date.now()}-${Math.random().toString(36)}`;
-
-            const response = await fetch("/api/rooms", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    roomId,
-                    roomName: roomName.trim(),
-                    ownerName: ownerName.trim(),
-                    cards: [0, 1, 2, 3, 5, 8, 13, 21, Infinity],
-                }),
+            const response = await api.post<Room>("/rooms", {
+                roomName: roomName.trim(),
+                ownerName: ownerName.trim(),
             });
 
-            const data = await response.json();
-
-            if (data.success) {
-                onRoomCreated(roomId, roomName.trim(), data.userId);
-            } else {
-                alert("Error creating room: " + data.error);
-            }
-        } catch (error) {
-            console.error("Error creating room:", error);
+            router.push(`/${response.id}`);
+        } catch (_) {
             alert("Error creating room");
         } finally {
             setIsCreating(false);
@@ -121,4 +104,4 @@ export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
             </Box>
         </Container>
     );
-}
+};

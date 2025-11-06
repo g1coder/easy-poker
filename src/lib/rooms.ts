@@ -1,16 +1,16 @@
 import { Room, User, VoteResult } from "@/types";
+import { randomUUID } from "node:crypto";
+import { CreateRoomRequest } from "@/api";
+
+const cards: number[] = [0, 1, 2, 3, 5, 8, 13, 21];
 
 class RoomManager {
     private rooms: Map<string, Room> = new Map();
     private users: Map<string, User> = new Map();
     private userRoomMap: Map<string, string> = new Map(); // userId -> roomId
 
-    createRoom(
-        roomId: string,
-        roomName: string,
-        ownerId: string,
-        cards: number[] = [0, 1, 2, 3, 5, 8, 13, 21]
-    ): Room {
+    createRoom(roomName: CreateRoomRequest["roomName"], ownerId: string): Room {
+        const roomId = randomUUID();
         const room: Room = {
             id: roomId,
             name: roomName,
@@ -24,12 +24,11 @@ class RoomManager {
         return room;
     }
 
-    getRoom(roomId: string): Room | undefined {
+    getRoom(roomId: string) {
         return this.rooms.get(roomId);
     }
 
     deleteRoom(roomId: string): boolean {
-        // Удаляем всех пользователей комнаты
         const roomUsers = Array.from(this.users.values()).filter(
             (user) => this.userRoomMap.get(user.id) === roomId
         );
@@ -97,7 +96,6 @@ class RoomManager {
         room.status = "voting";
         room.votes = {};
 
-        // Сбрасываем статус голосования у пользователей
         this.getRoomUsers(roomId).forEach((user) => {
             user.voted = false;
             user.vote = undefined;
@@ -127,7 +125,6 @@ class RoomManager {
 
         room.status = "revealed";
 
-        // Вычисляем среднее
         const votes = Object.values(room.votes).filter(
             (vote) => vote !== undefined
         );
@@ -136,7 +133,6 @@ class RoomManager {
             room.average = Math.round((sum / votes.length) * 100) / 100;
         }
 
-        // Формируем результаты
         return Object.entries(room.votes).map(([userId, vote]) => {
             const user = this.getUser(userId);
             return {
@@ -155,7 +151,6 @@ class RoomManager {
         room.votes = {};
         room.average = undefined;
 
-        // Сбрасываем статус голосования у пользователей
         this.getRoomUsers(roomId).forEach((user) => {
             user.voted = false;
             user.vote = undefined;

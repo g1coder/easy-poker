@@ -1,34 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
-import { roomManager } from "@/lib/rooms";
+import { cookies } from "next/headers";
+import {
+    ACCESS_TOKEN_NAME,
+    GetRoomResponse,
+    roomStore,
+    userStore,
+} from "@/api";
 
 export async function POST(request: NextRequest) {
     try {
-        const { roomId, roomName, ownerName, cards } = await request.json();
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get(ACCESS_TOKEN_NAME) as
+            | { value: string }
+            | undefined;
 
-        if (!roomId || !roomName || !ownerName) {
+        const { roomName, ownerName } = await request.json();
+
+        if (!roomName || (!accessToken?.value && !ownerName)) {
             return NextResponse.json(
                 { error: "Room ID, name and owner name are required" },
                 { status: 400 }
             );
         }
 
-        // Создаем комнату
-        const ownerId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const room = roomManager.createRoom(roomId, roomName, ownerId, cards);
+        let user = accessToken ? userStore.getUser(accessToken.value) : null;
+        if (!user) {
+            user = userStore.createUser(ownerName);
+            cookieStore.set(ACCESS_TOKEN_NAME, user.id, {
+                httpOnly: true,
+                secure: true,
+                expires: new Date(Date.now() + 10 * 60 * 1000),
+                sameSite: "lax",
+                path: "/",
+            });
+        }
+        const room = roomStore.createRoom(roomName, user.id);
+        const { ownerId, tasks, ...rest } = room;
+        const response: GetRoomResponse = {
+            ...rest,
+            isOwner: ownerId === user.id,
+            tasks: [...tasks.values()],
+        };
 
-        // Добавляем владельца
-        roomManager.addUser(ownerId, ownerName, roomId, true);
-
-        return NextResponse.json({
-            success: true,
-            room,
-            userId: ownerId,
-        });
+        return NextResponse.json(response, { status: 201 });
     } catch (error) {
-        console.error("Error creating room:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error }, { status: 500 });
     }
 }

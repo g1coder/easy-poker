@@ -2,42 +2,29 @@
 
 import { useState } from "react";
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
+import { api, JoinRoomResponse } from "@/api";
 
 interface JoinRoomProps {
-    onJoined: (roomId: string, userId: string, userName: string) => void;
+    roomId: string | null;
+    onJoin: () => void;
 }
 
-export default function JoinRoom({ onJoined }: JoinRoomProps) {
+export const JoinRoom = ({ roomId, onJoin }: JoinRoomProps) => {
     const [userName, setUserName] = useState("");
-    const [roomId, setRoomId] = useState("");
     const [isJoining, setIsJoining] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!userName.trim()) return;
-
         setIsJoining(true);
 
         try {
-            const response = await fetch(`/api/rooms/${roomId}/join`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    userName: userName.trim(),
-                }),
+            await api.post<JoinRoomResponse>(`/rooms/${roomId}/join`, {
+                userName: userName.trim(),
             });
 
-            const data = await response.json();
-
-            if (data.success) {
-                onJoined(roomId, data.userId, userName.trim());
-            } else {
-                alert("Error joining room: " + data.error);
-            }
-        } catch (error) {
-            console.error("Error joining room:", error);
+            onJoin();
+        } catch (_) {
             alert("Error joining room");
         } finally {
             setIsJoining(false);
@@ -65,17 +52,6 @@ export default function JoinRoom({ onJoined }: JoinRoomProps) {
                     margin="normal"
                     required
                     fullWidth
-                    label="Room Id"
-                    name="roomId"
-                    autoFocus
-                    value={roomId}
-                    onChange={(e) => setRoomId(e.target.value?.trim())}
-                    placeholder="Enter room ID"
-                />
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
                     label="Your Name"
                     name="userName"
                     autoComplete="name"
@@ -97,4 +73,4 @@ export default function JoinRoom({ onJoined }: JoinRoomProps) {
             </Box>
         </Container>
     );
-}
+};

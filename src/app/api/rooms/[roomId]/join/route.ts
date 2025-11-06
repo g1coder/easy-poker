@@ -1,23 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
-import { roomManager } from "@/lib/rooms";
+import { cookies } from "next/headers";
 import { sendToRoom } from "@/app/api/events/route";
+import {
+    ACCESS_TOKEN_NAME,
+    JoinRoomRequest,
+    roomStore,
+    userStore,
+} from "@/api";
+import { roomManager } from "@lib/rooms";
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: Promise<{ roomId: string }> }
+    { params }: { params: Promise<JoinRoomRequest> }
 ) {
     try {
         const { roomId } = await params;
         const { userName } = await request.json();
 
-        if (!userName) {
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get(ACCESS_TOKEN_NAME) as
+            | { value: string }
+            | undefined;
+
+        if (!userName && !accessToken?.value) {
             return NextResponse.json(
                 { error: "User name is required" },
                 { status: 400 }
             );
         }
 
-        const room = roomManager.getRoom(roomId);
+        const room = roomStore.getRoom(roomId);
         if (!room) {
             return NextResponse.json(
                 { error: "Room not found" },
@@ -25,32 +37,37 @@ export async function POST(
             );
         }
 
-        // Создаем пользователя
-        const userId = `user-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const user = roomManager.addUser(userId, userName, roomId);
+        let user = accessToken ? userStore.getUser(accessToken.value) : null;
+        if (!user) {
+            user = userStore.createUser(userName);
 
-        // Уведомляем всех о новом пользователе
+            cookieStore.set(ACCESS_TOKEN_NAME, user.id, {
+                httpOnly: true,
+                secure: true,
+                expires: new Date(Date.now() + 10 * 60 * 1000),
+                sameSite: "lax",
+                path: "/",
+            });
+        }
+
+        roomStore.joinUser(roomId, user?.id);
+
+        // уведомляем всех о новом пользователе
         const roomUsers = roomManager.getRoomUsers(roomId);
+        const { ownerId, ...response } = room;
+        response.isOwner = ownerId === user.id;
+
         sendToRoom(roomId, {
             type: "user-joined",
             data: {
-                room,
+                room: response,
                 users: roomUsers,
             },
             timestamp: new Date().toISOString(),
         });
 
-        return NextResponse.json({
-            success: true,
-            user,
-            userId,
-            room,
-        });
+        return NextResponse.json("", { status: 201 });
     } catch (error) {
-        console.error("Error joining room:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error }, { status: 500 });
     }
 }
