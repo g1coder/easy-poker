@@ -9,9 +9,8 @@ import {
     Container,
     CircularProgress,
 } from "@mui/material";
-import { api } from "@/api";
+import { api, Room } from "@/api";
 import { useRouter } from "next/navigation";
-import { Room } from "@/types";
 
 export const CreateRoom = () => {
     const [roomName, setRoomName] = useState("");

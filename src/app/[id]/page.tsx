@@ -16,14 +16,9 @@ import {
     ListItem,
     Divider,
 } from "@mui/material";
-
-// Типы
-interface Task {
-    id: number;
-    title: string;
-    link: string;
-    estimate: string | null;
-}
+import { RoomHeader } from "@components/room-header";
+import { Task } from "@/api";
+import { TaskList } from "@components/room-task-list";
 
 interface User {
     id: number;
@@ -37,30 +32,35 @@ type PokerCard = string;
 // Константы
 const initialTasks: Task[] = [
     {
-        id: 1,
-        title: "Реализация авторизации",
-        link: "PROJ-123",
+        id: "1",
+        link: "http://localhost:3000/13cf2a79-1b53-4fcf-961f-67c88c1cd1ef",
         estimate: null,
+        votes: {},
     },
     {
-        id: 2,
-        title: "Фикс бага с кэшированием",
-        link: "PROJ-124",
-        estimate: "5",
+        id: "2",
+        link: "http://localhost:3000/13cf2a79-1b53-4fcf-961f-67c88c1cd1ef",
+        estimate: 15,
+        votes: {},
     },
     {
-        id: 3,
-        title: "Добавление темной темы",
-        link: "PROJ-125",
+        id: "3",
+        link: "http://localhost:3000/13cf2a79-1b53-4fcf-961f-67c88c1cd1ef",
         estimate: null,
+        votes: {},
     },
     {
-        id: 4,
-        title: "Оптимизация загрузки изображений",
+        id: "4",
         link: "PROJ-126",
-        estimate: "8",
+        estimate: 8,
+        votes: {},
     },
-    { id: 5, title: "Рефакторинг API", link: "PROJ-127", estimate: null },
+    {
+        id: "5",
+        link: "PROJ-127",
+        estimate: null,
+        votes: {},
+    },
 ];
 
 const users: User[] = [
@@ -129,114 +129,112 @@ const PlanningPokerUI: React.FC = () => {
                 backgroundColor: "#f5f5f5",
             }}
         >
-            <Typography
-                variant="h4"
-                component="h1"
-                gutterBottom
-                align="center"
-                color="primary"
-            >
-                Planning Poker
-            </Typography>
+            <RoomHeader
+                title="RoomTest"
+                href={
+                    "http://localhost:3000/13cf2a79-1b53-4fcf-961f-67c88c1cd1ef"
+                }
+            />
 
             <Grid container spacing={2} sx={{ height: "calc(100vh - 100px)" }}>
                 {/* Левая колонка - Список задач */}
                 <Grid item xs={12} md={4}>
                     <Paper
                         sx={{
-                            p: 2,
+                            p: 1,
                             height: "100%",
                             display: "flex",
                             flexDirection: "column",
                             overflow: "auto",
                         }}
                     >
-                        <Box
-                            sx={{
-                                display: "flex",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                mb: 2,
-                            }}
-                        >
-                            <Typography variant="h6" component="h2">
-                                Задачи для оценки
-                            </Typography>
-                            <Button variant="outlined" size="small">
-                                Добавить задачу
-                            </Button>
-                        </Box>
+                        {/*<Box*/}
+                        {/*    sx={{*/}
+                        {/*        display: "flex",*/}
+                        {/*        justifyContent: "space-between",*/}
+                        {/*        alignItems: "center",*/}
+                        {/*        mb: 2,*/}
+                        {/*    }}*/}
+                        {/*>*/}
+                        {/*    <Typography variant="h6" component="h2">*/}
+                        {/*        Задачи для оценки*/}
+                        {/*    </Typography>*/}
+                        {/*    <Button variant="outlined" size="small">*/}
+                        {/*        Добавить задачу*/}
+                        {/*    </Button>*/}
+                        {/*</Box>*/}
 
-                        <List sx={{ flexGrow: 1, overflow: "auto" }}>
-                            {tasks.map((task, index) => (
-                                <React.Fragment key={task.id}>
-                                    <ListItem
-                                        sx={{
-                                            p: 1,
-                                            cursor: "pointer",
-                                            backgroundColor:
-                                                selectedTask?.id === task.id
-                                                    ? "action.selected"
-                                                    : "transparent",
-                                            borderRadius: 1,
-                                            "&:hover": {
-                                                backgroundColor: "action.hover",
-                                            },
-                                        }}
-                                        onClick={() => handleTaskSelect(task)}
-                                    >
-                                        <Card
-                                            sx={{ width: "100%" }}
-                                            variant="outlined"
-                                        >
-                                            <CardContent
-                                                sx={{
-                                                    p: 2,
-                                                    "&:last-child": { pb: 2 },
-                                                }}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        display: "flex",
-                                                        justifyContent:
-                                                            "space-between",
-                                                        alignItems:
-                                                            "flex-start",
-                                                    }}
-                                                >
-                                                    <Box>
-                                                        <Typography
-                                                            variant="body2"
-                                                            color="text.secondary"
-                                                            gutterBottom
-                                                        >
-                                                            {task.link}
-                                                        </Typography>
-                                                        <Typography
-                                                            variant="body1"
-                                                            component="div"
-                                                        >
-                                                            {task.title}
-                                                        </Typography>
-                                                    </Box>
-                                                    {task.estimate && (
-                                                        <Chip
-                                                            label={
-                                                                task.estimate
-                                                            }
-                                                            color="primary"
-                                                            variant="outlined"
-                                                            size="small"
-                                                        />
-                                                    )}
-                                                </Box>
-                                            </CardContent>
-                                        </Card>
-                                    </ListItem>
-                                    {index < tasks.length - 1 && <Divider />}
-                                </React.Fragment>
-                            ))}
-                        </List>
+                        {/*<List sx={{ flexGrow: 1, overflow: "auto" }}>*/}
+                        {/*    {tasks.map((task, index) => (*/}
+                        {/*        <React.Fragment key={task.id}>*/}
+                        {/*            <ListItem*/}
+                        {/*                sx={{*/}
+                        {/*                    p: 1,*/}
+                        {/*                    cursor: "pointer",*/}
+                        {/*                    backgroundColor:*/}
+                        {/*                        selectedTask?.id === task.id*/}
+                        {/*                            ? "action.selected"*/}
+                        {/*                            : "transparent",*/}
+                        {/*                    borderRadius: 1,*/}
+                        {/*                    "&:hover": {*/}
+                        {/*                        backgroundColor: "action.hover",*/}
+                        {/*                    },*/}
+                        {/*                }}*/}
+                        {/*                onClick={() => handleTaskSelect(task)}*/}
+                        {/*            >*/}
+                        {/*                <Card*/}
+                        {/*                    sx={{ width: "100%" }}*/}
+                        {/*                    variant="outlined"*/}
+                        {/*                >*/}
+                        {/*                    <CardContent*/}
+                        {/*                        sx={{*/}
+                        {/*                            p: 2,*/}
+                        {/*                            "&:last-child": { pb: 2 },*/}
+                        {/*                        }}*/}
+                        {/*                    >*/}
+                        {/*                        <Box*/}
+                        {/*                            sx={{*/}
+                        {/*                                display: "flex",*/}
+                        {/*                                justifyContent:*/}
+                        {/*                                    "space-between",*/}
+                        {/*                                alignItems:*/}
+                        {/*                                    "flex-start",*/}
+                        {/*                            }}*/}
+                        {/*                        >*/}
+                        {/*                            <Box>*/}
+                        {/*                                <Typography*/}
+                        {/*                                    variant="body2"*/}
+                        {/*                                    color="text.secondary"*/}
+                        {/*                                    gutterBottom*/}
+                        {/*                                >*/}
+                        {/*                                    {task.link}*/}
+                        {/*                                </Typography>*/}
+                        {/*                                <Typography*/}
+                        {/*                                    variant="body1"*/}
+                        {/*                                    component="div"*/}
+                        {/*                                >*/}
+                        {/*                                    {task.title}*/}
+                        {/*                                </Typography>*/}
+                        {/*                            </Box>*/}
+                        {/*                            {task.estimate && (*/}
+                        {/*                                <Chip*/}
+                        {/*                                    label={*/}
+                        {/*                                        task.estimate*/}
+                        {/*                                    }*/}
+                        {/*                                    color="primary"*/}
+                        {/*                                    variant="outlined"*/}
+                        {/*                                    size="small"*/}
+                        {/*                                />*/}
+                        {/*                            )}*/}
+                        {/*                        </Box>*/}
+                        {/*                    </CardContent>*/}
+                        {/*                </Card>*/}
+                        {/*            </ListItem>*/}
+                        {/*            {index < tasks.length - 1 && <Divider />}*/}
+                        {/*        </React.Fragment>*/}
+                        {/*    ))}*/}
+                        {/*</List>*/}
+                        <TaskList tasks={tasks} onDeleteTask={() => {}} />
                     </Paper>
                 </Grid>
 

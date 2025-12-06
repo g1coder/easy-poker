@@ -1,5 +1,4 @@
-import { Room } from "@/types";
-import { Task } from "@/api";
+import { Room, Task } from "../types";
 
 export interface GetRoomRequest {
     roomId: string;

@@ -12,7 +12,7 @@ export async function POST(
 
         if (!action || !userId) {
             return NextResponse.json(
-                { error: "Action and user ID are required" },
+                { error: "Action and user.ts ID are required" },
                 { status: 400 }
             );
         }

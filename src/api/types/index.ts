@@ -1,6 +1,4 @@
-export interface Task {
-    id: string;
-    href: string;
-    votes: number[];
-    vote: number | null;
-}
+export * from "./events";
+export * from "./room";
+export * from "./task";
+export * from "./user";

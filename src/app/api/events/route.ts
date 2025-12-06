@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
             // Отправляем начальное состояние
             const roomUsers = roomManager.getRoomUsers(roomId);
             const initialEvent: PokerEvent = {
-                type: "user-joined",
+                type: "user.ts-joined",
                 data: {
                     room,
                     users: roomUsers,

@@ -58,7 +58,7 @@ export async function POST(
         response.isOwner = ownerId === user.id;
 
         sendToRoom(roomId, {
-            type: "user-joined",
+            type: "user.ts-joined",
             data: {
                 room: response,
                 users: roomUsers,

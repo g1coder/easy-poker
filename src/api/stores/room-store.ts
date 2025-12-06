@@ -6,7 +6,7 @@ const cards: number[] = [0, 1, 2, 3, 5, 8, 13, 21];
 
 const mockTasks: Task[] = Array.from({ length: 20 }).map((_, idx) => ({
     id: idx.toString(),
-    href: "http://localhost:3000/74b87805-71dc-422a-9cec-b8da5ccd1a66",
+    link: "http://localhost:3000/74b87805-71dc-422a-9cec-b8da5ccd1a66",
     vote: 1,
     votes: [],
 }));

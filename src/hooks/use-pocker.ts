@@ -61,8 +61,8 @@ export const usePoker = (options: UsePokerOptions) => {
                     console.log("📨 Poker event:", pokerEvent.type);
 
                     switch (pokerEvent.type) {
-                        case "user-joined":
-                        case "user-left":
+                        case "user.ts-joined":
+                        case "user.ts-left":
                         case "vote-started":
                         case "vote-reset":
                             setRoom(pokerEvent.data.room);
