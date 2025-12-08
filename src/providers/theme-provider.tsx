@@ -6,6 +6,15 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 const theme = createTheme({
     cssVariables: true,
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    textTransform: "none",
+                },
+            },
+        },
+    },
 });
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {

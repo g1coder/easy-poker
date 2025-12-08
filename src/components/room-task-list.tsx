@@ -9,8 +9,9 @@ import {
     Chip,
     Paper,
     useTheme,
+    Button,
 } from "@mui/material";
-import { Delete, Launch } from "@mui/icons-material";
+import { Delete } from "@mui/icons-material";
 import { Task } from "@/api";
 
 interface TaskItemProps {
@@ -78,13 +79,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onDelete }) => {
                     {task.estimate}
                 </Typography>
 
-                <IconButton
-                    onClick={() => onDelete(task.id)}
-                    size="small"
-                    sx={{
-                        color: "error.main",
-                    }}
-                >
+                <IconButton onClick={() => onDelete(task.id)} size="small">
                     <Delete fontSize="small" />
                 </IconButton>
             </Box>
@@ -96,22 +91,31 @@ interface TaskListProps {}
 
 export const TaskList = ({ tasks, onDeleteTask }: TaskListProps) => {
     return (
-        <List>
-            {tasks.map((task) => (
-                <TaskItem key={task.id} task={task} onDelete={onDeleteTask} />
-            ))}
+        <>
+            <Button variant="contained" sx={{ width: "fit-content" }}>
+                Add tasks
+            </Button>
+            <List>
+                {tasks.map((task) => (
+                    <TaskItem
+                        key={task.id}
+                        task={task}
+                        onDelete={onDeleteTask}
+                    />
+                ))}
 
-            {tasks.length === 0 && (
-                <ListItem>
-                    <Typography
-                        color="text.secondary"
-                        textAlign="center"
-                        sx={{ width: "100%", py: 3 }}
-                    >
-                        Задачи отсутствуют
-                    </Typography>
-                </ListItem>
-            )}
-        </List>
+                {tasks.length === 0 && (
+                    <ListItem>
+                        <Typography
+                            color="text.secondary"
+                            textAlign="center"
+                            sx={{ width: "100%", py: 3 }}
+                        >
+                            Задачи отсутствуют
+                        </Typography>
+                    </ListItem>
+                )}
+            </List>
+        </>
     );
 };
