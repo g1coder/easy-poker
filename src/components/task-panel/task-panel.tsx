@@ -13,20 +13,30 @@ import styles from "./task-panel.module.scss";
 import { cx } from "@/utils";
 import { AddTask } from "./add-task";
 import { TaskMenu } from "./task-menu";
+import { api, Task } from "@/api";
 
-type MockTask = { id: string; title: string; estimate: string };
+interface TaskPanelProps {
+    roomId: string;
+    tasks: Task[];
+    isOwner: boolean;
+    selectedId: Task["id"] | null;
+    onSelect: (task: Task) => void;
+}
 
-const tasks: MockTask[] = [
-    { id: "1", title: "Add dark mode", estimate: "1" },
-    { id: "2", title: "Fix login bug", estimate: "" },
-    { id: "3", title: "User profile", estimate: "3" },
-];
-
-export const TaskPanel = () => {
-    const [selectedTask, setSelectedTask] = useState<MockTask | null>(null);
+export const TaskPanel = ({
+    roomId,
+    tasks,
+    isOwner,
+    selectedId,
+    onSelect,
+}: TaskPanelProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    console.log(selectedTask);
+    const handleAddTasks = async (value: string[]) => {
+        await api.post(`/rooms/${roomId}/tasks/add`, {
+            tasks: value,
+        });
+    };
 
     return (
         <>
@@ -62,11 +72,11 @@ export const TaskPanel = () => {
                     <Fragment key={task.id}>
                         <ListItem
                             onClick={() => {
-                                setSelectedTask(task);
+                                onSelect(task);
                             }}
                             className={cx(
                                 styles.listItem,
-                                task.id === selectedTask?.id && styles.selected
+                                task.id === selectedId && styles.selected
                             )}
                             disablePadding
                             secondaryAction={
@@ -96,7 +106,7 @@ export const TaskPanel = () => {
                                         }}
                                     >
                                         <Typography variant="body2">
-                                            {task.title}
+                                            {task.link}
                                         </Typography>
                                     </Box>
                                 }
@@ -106,13 +116,13 @@ export const TaskPanel = () => {
                 ))}
             </List>
 
-            <AddTask
-                open={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onAddTasks={(_tasks) => {
-                    console.log("ADD", _tasks);
-                }}
-            />
+            {isOwner && (
+                <AddTask
+                    open={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onAddTasks={handleAddTasks}
+                />
+            )}
         </>
     );
 };

@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
                 path: "/",
             });
         }
-        const room = roomStore.createRoom(roomName, user.id);
+        const room = roomStore.createRoom(roomName, user);
         const { ownerId, tasks, ...rest } = room;
         const response: GetRoomResponse = {
             ...rest,

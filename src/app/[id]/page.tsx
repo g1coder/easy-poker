@@ -5,106 +5,25 @@ import { Grid, Paper, Box, Stack } from "@mui/material";
 
 import { RoomHeader } from "@components/room-header";
 import { Task } from "@/api";
-import { TaskList } from "@components/room-task-list";
 import { VotingPanel } from "@components/voting-panel/voting-panel";
 import { UsersPanel } from "@components/user-panel/user-panel";
 import { VotingControl } from "@components/voting-control/voting-control";
 import { TaskPanel } from "@components/task-panel/task-panel";
+import { useRoom } from "@/hooks/use-room";
+import { useParams } from "next/navigation";
 
-const initialTasks: Task[] = [
-    {
-        id: "1",
-        link: "http://localhost:3000/13cf2a79-1b53-4fcf-961f-67c88c1cd1ef",
-        estimate: null,
-        votes: {},
-    },
-    {
-        id: "2",
-        link: "http://localhost:3000/13cf2a79-1b53-4fcf-961f-67c88c1cd1ef",
-        estimate: 15,
-        votes: {},
-    },
-    {
-        id: "3",
-        link: "http://localhost:3000/13cf2a79-1b53-4fcf-961f-67c88c1cd1ef",
-        estimate: null,
-        votes: {},
-    },
-    {
-        id: "4",
-        link: "PROJ-126",
-        estimate: 8,
-        votes: {},
-    },
-    {
-        id: "5",
-        link: "PROJ-127",
-        estimate: null,
-        votes: {},
-    },
-];
+const RoomPage = () => {
+    const params = useParams<{ id: string }>();
+    const roomId = String(params?.id);
 
-const participants = [
-    {
-        id: "1",
-        username: "Dexter Morgan",
-        isOnline: true,
-        hasVoted: true,
-        vote: "8",
-    },
-    {
-        id: "2",
-        username: "Debra Morgan",
-        isOnline: true,
-        hasVoted: false,
-        vote: "",
-    },
-    {
-        id: "3",
-        username: "Harry Morgan",
-        isOnline: true,
-        hasVoted: true,
-        vote: "13",
-    },
-    {
-        id: "4",
-        username: "Rita Bennett",
-        isOnline: false,
-        hasVoted: false,
-        vote: "",
-    },
-    {
-        id: "5",
-        username: "Angel Batista",
-        isOnline: true,
-        hasVoted: true,
-        vote: "5",
-    },
-    {
-        id: "6",
-        username: "Vince Masuka",
-        isOnline: true,
-        hasVoted: false,
-        vote: "",
-    },
-    {
-        id: "7",
-        username: "Maria LaGuerta",
-        isOnline: true,
-        hasVoted: true,
-        vote: "20",
-    },
-    {
-        id: "8",
-        username: "James Doakes",
-        isOnline: false,
-        hasVoted: true,
-        vote: "?",
-    },
-];
+    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-const PlanningPokerUI: React.FC = () => {
-    const [tasks, setTasks] = useState<Task[]>(initialTasks);
+    const { room } = useRoom({
+        roomId,
+        onEvent: (event) => {
+            console.log("Poker event received:", event.type);
+        },
+    });
 
     return (
         <Box
@@ -119,12 +38,7 @@ const PlanningPokerUI: React.FC = () => {
                 gap: 2,
             }}
         >
-            <RoomHeader
-                title="RoomTest"
-                href={
-                    "http://localhost:3000/13cf2a79-1b53-4fcf-961f-67c88c1cd1ef"
-                }
-            />
+            <RoomHeader title={room?.name || ""} href={window.location.href} />
 
             <Grid container spacing={2} sx={{ height: "calc(100vh - 100px)" }}>
                 <Grid size="grow">
@@ -137,8 +51,13 @@ const PlanningPokerUI: React.FC = () => {
                             overflow: "auto",
                         }}
                     >
-                        {/*<TaskList tasks={tasks} onDeleteTask={() => {}} />*/}
-                        <TaskPanel />
+                        <TaskPanel
+                            roomId={roomId}
+                            tasks={room?.tasks || []}
+                            isOwner={!!room?.ownerId}
+                            selectedId={selectedTask?.id || null}
+                            onSelect={setSelectedTask}
+                        />
                     </Paper>
                 </Grid>
                 <Grid size={6}>
@@ -151,11 +70,11 @@ const PlanningPokerUI: React.FC = () => {
                     >
                         <Stack sx={{ gap: 2, width: "100%" }}>
                             <VotingControl
-                                title="Make refactoring everything"
-                                estimation="22"
-                                isOwner
+                                title={selectedTask?.link || ""}
+                                estimation={selectedTask?.estimate || ""}
+                                isOwner={!!room?.ownerId}
                             />
-                            <UsersPanel participants={participants} />
+                            <UsersPanel users={room?.users || []} />
                         </Stack>
                     </Paper>
                 </Grid>
@@ -174,4 +93,4 @@ const PlanningPokerUI: React.FC = () => {
     );
 };
 
-export default PlanningPokerUI;
+export default RoomPage;

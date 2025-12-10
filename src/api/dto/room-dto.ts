@@ -26,3 +26,8 @@ export interface JoinRoomRequest {
 export interface JoinRoomResponse {
     roomId: string;
 }
+
+export interface AddRoomTasksRequest {
+    roomId: string;
+    tasks: string[];
+}

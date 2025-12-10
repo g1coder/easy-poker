@@ -4,10 +4,12 @@ import { sendToRoom } from "@/app/api/events/route";
 import {
     ACCESS_TOKEN_NAME,
     JoinRoomRequest,
+    Room,
     roomStore,
     userStore,
 } from "@/api";
 import { roomManager } from "@lib/rooms";
+import { getRoomOrError } from "@api/helpers";
 
 export async function POST(
     request: NextRequest,
@@ -29,13 +31,7 @@ export async function POST(
             );
         }
 
-        const room = roomStore.getRoom(roomId);
-        if (!room) {
-            return NextResponse.json(
-                { error: "Room not found" },
-                { status: 404 }
-            );
-        }
+        const room = getRoomOrError(roomId) as Room;
 
         let user = accessToken ? userStore.getUser(accessToken.value) : null;
         if (!user) {
@@ -50,7 +46,7 @@ export async function POST(
             });
         }
 
-        roomStore.joinUser(roomId, user?.id);
+        roomStore.joinUser(roomId, user);
 
         // уведомляем всех о новом пользователе
         const roomUsers = roomManager.getRoomUsers(roomId);

@@ -5,7 +5,8 @@ export interface PokerEvent {
         | "vote-started"
         | "vote-received"
         | "votes-revealed"
-        | "vote-reset";
+        | "vote-reset"
+        | "new-tasks";
     // eslint-disable-next-line
     data: any;
     timestamp: string;

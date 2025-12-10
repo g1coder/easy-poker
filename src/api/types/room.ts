@@ -1,4 +1,5 @@
 import { Task } from "./task";
+import { User } from "./user";
 
 export interface Room {
     id: string;
@@ -6,5 +7,6 @@ export interface Room {
     ownerId: string;
     isOwner: boolean;
     status: "waiting" | "voting" | "revealed";
-    tasks: Map<string, Task>;
+    tasks: Task[];
+    users: User[];
 }

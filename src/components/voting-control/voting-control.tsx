@@ -22,7 +22,7 @@ export const VotingControl = ({
     return (
         <>
             <Box className={styles.container}>
-                <Stack gap={1}>
+                <Stack gap={1} flex={1}>
                     <Typography variant="caption" color="text.secondary">
                         CURRENT TASK
                     </Typography>

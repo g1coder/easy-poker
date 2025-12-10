@@ -1,24 +1,15 @@
 import React from "react";
-import { ParticipantCard } from "./user-card";
 import { Box, Stack, Typography } from "@mui/material";
+import { User } from "@/api";
+import { ParticipantCard } from "./user-card";
 
-interface Participant {
-    id: string;
-    username: string;
-    isOnline: boolean;
-    hasVoted: boolean;
-    vote: string;
+interface UsersPanelProps {
+    users: User[];
 }
 
-interface ParticipantsPanelProps {
-    participants: Participant[];
-}
-
-export const UsersPanel: React.FC<ParticipantsPanelProps> = ({
-    participants,
-}) => {
-    const onlineCount = participants.filter((p) => p.isOnline).length;
-    const votedCount = participants.filter((p) => p.hasVoted).length;
+export const UsersPanel = ({ users }: UsersPanelProps) => {
+    const onlineCount = users.filter((p) => p.connected).length;
+    const votedCount = users.filter((p) => p.voted).length;
     const left = onlineCount - votedCount;
 
     return (
@@ -30,22 +21,24 @@ export const UsersPanel: React.FC<ParticipantsPanelProps> = ({
             }}
         >
             <Stack alignItems="flex-end">
-                <Typography
-                    variant="body1"
-                    fontWeight={600}
-                    color={left ? "warning" : "success"}
-                    sx={{
-                        padding: "0.25rem 1rem",
-                        borderRadius: 1,
-                    }}
-                >
-                    {left ? `${left} left` : "all voted!"}
-                </Typography>
+                {users?.length > 0 && (
+                    <Typography
+                        variant="body1"
+                        fontWeight={600}
+                        color={left ? "warning" : "success"}
+                        sx={{
+                            padding: "0.25rem 1rem",
+                            borderRadius: 1,
+                        }}
+                    >
+                        {left ? `${left} left` : "all voted!"}
+                    </Typography>
+                )}
             </Stack>
 
             <Stack direction="row" flexWrap="wrap" maxWidth="1000px" gap={4}>
-                {participants?.map((item) => (
-                    <ParticipantCard key={item.id} {...item} />
+                {users?.map((item) => (
+                    <ParticipantCard key={item.id} user={item} />
                 ))}
             </Stack>
         </Box>

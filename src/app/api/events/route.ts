@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
-import { roomManager } from "@/lib/rooms";
-import { PokerEvent } from "@/types";
+import { roomStore, userStore } from "@/api";
+import { PokerEvent } from "@/api/types";
+import { getUserTokenOrError } from "@api/helpers";
 
 const clients = new Map<
     string,
@@ -13,20 +14,20 @@ const clients = new Map<
 
 export async function GET(request: NextRequest) {
     const roomId = request.nextUrl.searchParams.get("roomId");
-    const userId = request.nextUrl.searchParams.get("userId");
+    const token = await getUserTokenOrError();
+    const userId = userStore.getUser(token as string)?.id as string;
+    console.log("===>>> USER ID", userId);
 
     if (!roomId || !userId) {
         return new Response("Missing roomId or userId", { status: 400 });
     }
 
-    // Проверяем существование комнаты
-    const room = roomManager.getRoom(roomId);
+    const room = roomStore.getRoom(roomId);
     if (!room) {
         return new Response("Room not found", { status: 404 });
     }
 
-    // Обновляем статус подключения пользователя
-    roomManager.setUserConnection(userId, true);
+    userStore.setUserConnection(userId, true);
 
     const stream = new ReadableStream({
         start(controller) {
@@ -40,8 +41,7 @@ export async function GET(request: NextRequest) {
 
             console.log(`🔗 SSE connected: ${clientId}`);
 
-            // Отправляем начальное состояние
-            const roomUsers = roomManager.getRoomUsers(roomId);
+            const roomUsers = roomStore.getRoomUsers(roomId);
             const initialEvent: PokerEvent = {
                 type: "user.ts-joined",
                 data: {
@@ -53,7 +53,6 @@ export async function GET(request: NextRequest) {
 
             sendToClient(controller, initialEvent);
 
-            // Ping каждые 30 секунд
             const pingInterval = setInterval(() => {
                 try {
                     if (clients.has(clientId)) {
@@ -76,14 +75,14 @@ export async function GET(request: NextRequest) {
                 console.log(`🔴 SSE disconnected: ${clientId}`);
                 clearInterval(pingInterval);
                 clients.delete(clientId);
-                roomManager.setUserConnection(userId, false);
+                userStore.setUserConnection(userId, false);
             });
         },
 
         cancel() {
             console.log(`❌ SSE stream cancelled for user ${userId}`);
             clients.delete(`${roomId}-${userId}`);
-            roomManager.setUserConnection(userId, false);
+            userStore.setUserConnection(userId, false);
         },
     });
 

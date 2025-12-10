@@ -3,26 +3,21 @@ import { Box, Stack, Typography } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import styles from "./user-card.module.scss";
+import { User } from "@/api";
 
 interface ParticipantCardProps {
-    username: string;
-    vote: string;
-    isOnline: boolean;
-    hasVoted: boolean;
+    user: User;
 }
 
-export const ParticipantCard = ({
-    username,
-    vote,
-    isOnline,
-    hasVoted,
-}: ParticipantCardProps) => {
+export const ParticipantCard = ({ user }: ParticipantCardProps) => {
+    const { name, voted, vote, connected } = user;
+
     const renderContent = () => {
-        if (!hasVoted) {
+        if (!voted) {
             return <MoreHorizIcon fontSize="large" color="action" />;
         }
 
-        return hasVoted && vote ? (
+        return voted && vote ? (
             <Typography variant="h4" color="primary">
                 {vote}
             </Typography>
@@ -44,9 +39,9 @@ export const ParticipantCard = ({
             <Stack alignItems="center" direction="row" spacing={1}>
                 <Box
                     className={styles.cirle}
-                    sx={{ bgcolor: isOnline ? "#10b981" : "#6b7280" }}
+                    sx={{ bgcolor: connected ? "#10b981" : "#6b7280" }}
                 />
-                <Typography variant="body1">{username}</Typography>
+                <Typography variant="body1">{name}</Typography>
             </Stack>
         </Stack>
     );

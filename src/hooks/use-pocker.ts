@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Room, User, PokerEvent } from "@/types";
+import { Room, User, PokerEvent } from "@/api/types";
 
 interface UsePokerOptions {
     roomId: string;
@@ -16,7 +16,6 @@ export const usePoker = (options: UsePokerOptions) => {
     const optionsRef = useRef(options);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Обновляем ref при изменении options
     useEffect(() => {
         optionsRef.current = options;
     }, [options]);

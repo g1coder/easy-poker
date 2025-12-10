@@ -23,6 +23,7 @@
             "@api/*": ["./src/api/*"],
             "@lib/*": ["./src/lib/*"],
             "@utils/*": ["./src/utils/*"],
+            "@types/*": ["./src/types/*"],
             "@components/*": ["./src/components/*"]
         }
     },

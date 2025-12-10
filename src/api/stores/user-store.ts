@@ -1,4 +1,4 @@
-import { User } from "@/types";
+import { User } from "../types";
 import { getRandomValues } from "node:crypto";
 
 const generateToken = () => {
@@ -8,13 +8,15 @@ const generateToken = () => {
 };
 
 class UserStore {
-    #userSessionMap: Map<string, Pick<User, "id" | "name">> = new Map();
+    #userSessionMap: Map<string, User> = new Map();
 
     public createUser(userName: string) {
         const token = generateToken();
-        const user = {
+        const user: User = {
             id: token,
             name: userName,
+            connected: true,
+            voted: false,
         };
         this.#userSessionMap.set(token, user);
         return user;
@@ -25,6 +27,13 @@ class UserStore {
 
         console.log("target user.ts", this.#userSessionMap.get(token));
         return this.#userSessionMap.get(token) || null;
+    }
+
+    public setUserConnection(userId: string, connected: boolean) {
+        const user = this.getUser(userId);
+        if (user) {
+            user.connected = connected;
+        }
     }
 }
 

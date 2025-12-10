@@ -25,7 +25,6 @@ export async function POST(
             );
         }
 
-        // Проверяем права владельца
         if (room.ownerId !== userId) {
             return NextResponse.json(
                 { error: "Only room owner can perform this action" },
@@ -80,7 +79,6 @@ export async function POST(
             );
         }
 
-        // Отправляем событие всем участникам
         sendToRoom(roomId, {
             type:
                 action === "start"
