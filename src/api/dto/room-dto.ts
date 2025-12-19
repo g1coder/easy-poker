@@ -1,11 +1,11 @@
-import { Room, Task } from "../types";
+import { Room } from "../types";
 
 export interface GetRoomRequest {
     roomId: string;
 }
 
-export interface GetRoomResponse extends Omit<Room, "ownerId" | "tasks"> {
-    tasks: Task[];
+export interface GetRoomResponse extends Room {
+    isOwner: boolean;
 }
 
 export interface CreateRoomRequest {

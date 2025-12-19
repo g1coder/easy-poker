@@ -1,24 +1,41 @@
-import { useState } from "react";
-import { Box, Button, Stack, Typography } from "@mui/material";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { Box, Button, Stack, Tooltip, Typography } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 import RedoIcon from "@mui/icons-material/Redo";
 import DoDisturbIcon from "@mui/icons-material/DoDisturb";
 import styles from "./voting-control.module.scss";
+import { api, Task } from "@/api";
 
 interface VotingPanelProps {
-    title: string;
-    estimation: string;
+    roomId: string;
+    task: Task | null;
     isOwner?: boolean;
 }
 
-export const VotingControl = ({
-    title,
-    estimation,
-    isOwner,
-}: VotingPanelProps) => {
-    const [isVoting, setIsVoting] = useState(false);
+export const VotingControl = ({ roomId, task, isOwner }: VotingPanelProps) => {
+    const { link: title, estimate, status } = task || {};
 
+    const handleReveal = async () => {
+        await api.post(`/rooms/${roomId}/session`, {
+            action: "reveal",
+            taskId: task?.id,
+        });
+    };
+
+    const handleReset = async () => {
+        await api.post(`/rooms/${roomId}/session`, {
+            action: "reset",
+            taskId: task?.id,
+        });
+    };
+
+    const handleFinish = async () => {
+        await api.post(`/rooms/${roomId}/session`, {
+            action: "done",
+            taskId: task?.id,
+        });
+    };
+
+    const isFinished = status === "finished";
     return (
         <>
             <Box className={styles.container}>
@@ -35,11 +52,11 @@ export const VotingControl = ({
                         ESTIMATION
                     </Typography>
                     <Typography variant="h5" textAlign="end">
-                        {estimation}
+                        {estimate}
                     </Typography>
                 </Stack>
             </Box>
-            {isOwner && (
+            {isOwner && task && (
                 <Stack
                     direction="row"
                     justifyContent="space-between"
@@ -47,37 +64,38 @@ export const VotingControl = ({
                     gap={1}
                 >
                     <Box>
-                        {isVoting ? (
+                        {status !== "revealed" ? (
                             <Button
                                 variant="contained"
                                 startIcon={<RedoIcon />}
-                                onClick={() => setIsVoting(false)}
+                                onClick={handleReveal}
                             >
                                 Reveal cards
                             </Button>
                         ) : (
                             <Button
-                                variant="contained"
-                                startIcon={<PlayArrowIcon />}
-                                onClick={() => setIsVoting(true)}
+                                variant="outlined"
+                                startIcon={<DoDisturbIcon />}
+                                color="warning"
+                                sx={{
+                                    ml: 1,
+                                }}
+                                onClick={handleReset}
                             >
-                                Start voting
+                                Reset votes
                             </Button>
                         )}
-                        <Button
-                            variant="outlined"
-                            startIcon={<DoDisturbIcon />}
-                            color="warning"
-                            sx={{
-                                ml: 1,
-                            }}
-                        >
-                            Cancel voting
-                        </Button>
                     </Box>
-                    <Button variant="outlined" startIcon={<DoneIcon />}>
-                        Done
-                    </Button>
+                    <Tooltip title="Freeze voting">
+                        <Button
+                            variant={"outlined"}
+                            color={isFinished ? "error" : "primary"}
+                            startIcon={!isFinished && <DoneIcon />}
+                            onClick={isFinished ? handleReset : handleFinish}
+                        >
+                            {isFinished ? "Re-voiting" : "Done"}
+                        </Button>
+                    </Tooltip>
                 </Stack>
             )}
         </>

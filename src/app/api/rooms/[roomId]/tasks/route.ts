@@ -26,7 +26,7 @@ export async function POST(
         sendToRoom(roomId, {
             type: "new-tasks",
             data: {
-                room: roomStore.getRoom(roomId),
+                tasks: roomStore.getRoomTasks(roomId),
             },
             timestamp: new Date().toISOString(),
         });

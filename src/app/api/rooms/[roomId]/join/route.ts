@@ -8,7 +8,6 @@ import {
     roomStore,
     userStore,
 } from "@/api";
-import { roomManager } from "@lib/rooms";
 import { getRoomOrError } from "@api/helpers";
 
 export async function POST(
@@ -49,14 +48,13 @@ export async function POST(
         roomStore.joinUser(roomId, user);
 
         // уведомляем всех о новом пользователе
-        const roomUsers = roomManager.getRoomUsers(roomId);
-        const { ownerId, ...response } = room;
-        response.isOwner = ownerId === user.id;
+        const roomUsers = roomStore.getRoomUsers(roomId);
+        console.log("======> is owner", room.ownerId, user.id);
 
         sendToRoom(roomId, {
             type: "user.ts-joined",
             data: {
-                room: response,
+                room: { ...room, ownerId: room.ownerId === user.id },
                 users: roomUsers,
             },
             timestamp: new Date().toISOString(),

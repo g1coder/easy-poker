@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
-import { roomStore, userStore } from "@/api";
+import { Room, roomStore, userStore } from "@/api";
 import { PokerEvent } from "@/api/types";
-import { getUserTokenOrError } from "@api/helpers";
+import { getRoomOrError, getUserTokenOrError } from "@api/helpers";
 
 const clients = new Map<
     string,
@@ -16,17 +16,12 @@ export async function GET(request: NextRequest) {
     const roomId = request.nextUrl.searchParams.get("roomId");
     const token = await getUserTokenOrError();
     const userId = userStore.getUser(token as string)?.id as string;
-    console.log("===>>> USER ID", userId);
 
-    if (!roomId || !userId) {
-        return new Response("Missing roomId or userId", { status: 400 });
+    if (!roomId) {
+        return new Response("roomId not found", { status: 404 });
     }
 
-    const room = roomStore.getRoom(roomId);
-    if (!room) {
-        return new Response("Room not found", { status: 404 });
-    }
-
+    const room = getRoomOrError(roomId) as Room;
     userStore.setUserConnection(userId, true);
 
     const stream = new ReadableStream({
@@ -45,8 +40,9 @@ export async function GET(request: NextRequest) {
             const initialEvent: PokerEvent = {
                 type: "user.ts-joined",
                 data: {
-                    room,
+                    room: { ...room, isOwner: room.ownerId === userId },
                     users: roomUsers,
+                    tasks: roomStore.getRoomTasks(roomId),
                 },
                 timestamp: new Date().toISOString(),
             };
@@ -70,7 +66,6 @@ export async function GET(request: NextRequest) {
                 }
             }, 30000);
 
-            // Обработка отключения
             request.signal.addEventListener("abort", () => {
                 console.log(`🔴 SSE disconnected: ${clientId}`);
                 clearInterval(pingInterval);

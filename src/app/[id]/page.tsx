@@ -18,7 +18,7 @@ const RoomPage = () => {
 
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
-    const { room } = useRoom({
+    const { room, tasks } = useRoom({
         roomId,
         onEvent: (event) => {
             console.log("Poker event received:", event.type);
@@ -41,7 +41,7 @@ const RoomPage = () => {
             <RoomHeader title={room?.name || ""} href={window.location.href} />
 
             <Grid container spacing={2} sx={{ height: "calc(100vh - 100px)" }}>
-                <Grid size="grow">
+                <Grid size="auto">
                     <Paper
                         sx={{
                             p: 2,
@@ -49,18 +49,19 @@ const RoomPage = () => {
                             display: "flex",
                             flexDirection: "column",
                             overflow: "auto",
+                            minWidth: "360px",
                         }}
                     >
                         <TaskPanel
                             roomId={roomId}
-                            tasks={room?.tasks || []}
-                            isOwner={!!room?.ownerId}
+                            tasks={tasks || []}
+                            isOwner={!!room?.isOwner}
                             selectedId={selectedTask?.id || null}
                             onSelect={setSelectedTask}
                         />
                     </Paper>
                 </Grid>
-                <Grid size={6}>
+                <Grid size="grow">
                     <Paper
                         sx={{
                             p: 3,
@@ -70,22 +71,16 @@ const RoomPage = () => {
                     >
                         <Stack sx={{ gap: 2, width: "100%" }}>
                             <VotingControl
-                                title={selectedTask?.link || ""}
-                                estimation={selectedTask?.estimate || ""}
-                                isOwner={!!room?.ownerId}
+                                roomId={roomId}
+                                task={selectedTask}
+                                isOwner={!!room?.isOwner}
                             />
                             <UsersPanel users={room?.users || []} />
+                            <VotingPanel
+                                roomId={roomId}
+                                task={selectedTask || null}
+                            />
                         </Stack>
-                    </Paper>
-                </Grid>
-                <Grid size="grow">
-                    <Paper
-                        sx={{
-                            p: 3,
-                            height: "100%",
-                        }}
-                    >
-                        <VotingPanel onClick={() => {}} />
                     </Paper>
                 </Grid>
             </Grid>

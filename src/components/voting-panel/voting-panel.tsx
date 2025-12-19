@@ -1,42 +1,43 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
+import { api, TaskDto } from "@/api";
 import styles from "./voting-panel.module.scss";
 
 interface VotingPanelProps {
-    onClick: (value: string) => void;
-    vote?: string;
-    disabled?: boolean;
+    roomId: string;
+    task: TaskDto | null;
 }
 
 const votes: string[] = ["1", "2", "3", "5", "8", "13", "21", "34", "?", "☕"];
 
-export const VotingPanel = (props: VotingPanelProps) => {
-    const [selectedVote, setSelectedVote] = useState<string | null>(
-        props.vote || null
-    );
+export const VotingPanel = ({ roomId, task }: VotingPanelProps) => {
+    const [, setVote] = useState<string>("");
 
-    const handleSelect =
-        (value: string) => (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleVote =
+        (value: string) => async (e: React.MouseEvent<HTMLDivElement>) => {
             e.preventDefault();
-            setSelectedVote(value);
-            props.onClick(value);
+            setVote(value);
+            await api.post(`/rooms/${roomId}/session`, {
+                action: "reveal",
+                taskId: task?.id,
+            });
         };
 
     return (
         <div className={styles.container}>
             {votes.map((vote) => {
-                const isSelected = vote === selectedVote;
+                const isSelected = vote === task?.vote;
                 return (
                     <div
                         key={vote}
                         className={`
                         ${styles.card} 
                         ${isSelected ? styles.selected : ""} 
-                        ${props.disabled ? styles.disabled : ""}
+                        ${task?.status === "finished" ? styles.disabled : ""}
                       `}
                         role="button"
                         tabIndex={0}
-                        onClick={handleSelect(vote)}
+                        onClick={handleVote(vote)}
                     >
                         <Box className={styles.content} p={1}>
                             <Typography

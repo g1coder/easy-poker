@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import {
-    ACCESS_TOKEN_NAME,
-    GetRoomRequest,
-    GetRoomResponse,
-    roomStore,
-    userStore,
-} from "@/api";
+import { ACCESS_TOKEN_NAME, GetRoomRequest, roomStore, userStore } from "@/api";
 
 export async function GET(
     _: NextRequest,
@@ -43,11 +37,10 @@ export async function GET(
                 { status: 403 }
             );
         }
-        const { ownerId, tasks, ...rest } = room;
-        const response: GetRoomResponse = {
-            ...rest,
-            isOwner: ownerId === user.id,
-            tasks: [...tasks.values()],
+        const response = {
+            ...room,
+            isOwner: room.ownerId === user.id,
+            tasks: roomStore.getRoomTasks(roomId),
         };
 
         return NextResponse.json(response, { status: 200 });

@@ -52,19 +52,21 @@ export const TaskPanel = ({
                     {`TASKS: ${tasks.length}`}
                 </Typography>
 
-                <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<AddIcon />}
-                    onClick={() => setIsModalOpen(true)}
-                    sx={{
-                        borderRadius: 1,
-                        textTransform: "none",
-                        fontSize: "0.875rem",
-                    }}
-                >
-                    Add tasks
-                </Button>
+                {isOwner && (
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<AddIcon />}
+                        onClick={() => setIsModalOpen(true)}
+                        sx={{
+                            borderRadius: 1,
+                            textTransform: "none",
+                            fontSize: "0.875rem",
+                        }}
+                    >
+                        Add tasks
+                    </Button>
+                )}
             </Box>
 
             <List dense disablePadding>

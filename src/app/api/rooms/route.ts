@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import {
-    ACCESS_TOKEN_NAME,
-    GetRoomResponse,
-    roomStore,
-    userStore,
-} from "@/api";
+import { ACCESS_TOKEN_NAME, roomStore, userStore } from "@/api";
 
 export async function POST(request: NextRequest) {
     try {
@@ -35,11 +30,10 @@ export async function POST(request: NextRequest) {
             });
         }
         const room = roomStore.createRoom(roomName, user);
-        const { ownerId, tasks, ...rest } = room;
-        const response: GetRoomResponse = {
-            ...rest,
-            isOwner: ownerId === user.id,
-            tasks: [...tasks.values()],
+        const response = {
+            ...room,
+            isOwner: room.ownerId === user.id,
+            tasks: roomStore.getRoomTasks(room.id),
         };
 
         return NextResponse.json(response, { status: 201 });

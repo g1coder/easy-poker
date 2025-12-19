@@ -24,12 +24,10 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
         setMounted(true);
     }, []);
 
-    if (!mounted) {
-        return <>{children}</>;
-    }
+    const themeToUse = mounted ? theme : createTheme({});
 
     return (
-        <MuiThemeProvider theme={theme}>
+        <MuiThemeProvider theme={themeToUse}>
             <CssBaseline />
             {children}
         </MuiThemeProvider>

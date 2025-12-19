@@ -12,8 +12,4 @@ export interface PokerEvent {
     timestamp: string;
 }
 
-export interface VoteResult {
-    userId: string;
-    userName: string;
-    vote: number;
-}
+export type VoteControlAction = "reveal" | "reset" | "done";

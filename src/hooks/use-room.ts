@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Room, PokerEvent } from "@/api/types";
+import { PokerEvent, Task } from "@/api/types";
+import { RoomDto } from "@/api";
 
 interface UseRoomOptions {
     roomId: string;
@@ -7,7 +8,8 @@ interface UseRoomOptions {
 }
 
 export const useRoom = (options: UseRoomOptions) => {
-    const [room, setRoom] = useState<Room | null>(null);
+    const [room, setRoom] = useState<RoomDto | null>(null);
+    const [tasks, setTasks] = useState<Task[]>([]);
     const [isConnected, setIsConnected] = useState(false);
 
     const eventSourceRef = useRef<EventSource | null>(null);
@@ -61,6 +63,7 @@ export const useRoom = (options: UseRoomOptions) => {
                         case "vote-started":
                         case "vote-reset":
                             setRoom(pokerEvent.data.room);
+                            setTasks(pokerEvent.data.tasks);
                             break;
 
                         case "vote-received":
@@ -71,7 +74,7 @@ export const useRoom = (options: UseRoomOptions) => {
                             setRoom(pokerEvent.data.room);
                             break;
                         case "new-tasks":
-                            setRoom(pokerEvent.data.room);
+                            setTasks(pokerEvent.data.tasks);
                             break;
                     }
 
@@ -120,108 +123,10 @@ export const useRoom = (options: UseRoomOptions) => {
         };
     }, [connectSSE, disconnectSSE]);
 
-    // const submitVote = useCallback(
-    //     async (vote: number) => {
-    //         try {
-    //             const response = await fetch(
-    //                 `/api/rooms/${options.roomId}/vote`,
-    //                 {
-    //                     method: "POST",
-    //                     headers: {
-    //                         "Content-Type": "application/json",
-    //                     },
-    //                     body: JSON.stringify({
-    //                         userId: options.userId,
-    //                         vote,
-    //                     }),
-    //                 }
-    //             );
-    //
-    //             return response.ok;
-    //         } catch (error) {
-    //             console.error("Error submitting vote:", error);
-    //             return false;
-    //         }
-    //     },
-    //     [options.roomId, options.userId]
-    // );
-    //
-    // const startVoting = useCallback(async () => {
-    //     try {
-    //         const response = await fetch(
-    //             `/api/rooms/${options.roomId}/session`,
-    //             {
-    //                 method: "POST",
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                 },
-    //                 body: JSON.stringify({
-    //                     action: "start",
-    //                     userId: options.userId,
-    //                 }),
-    //             }
-    //         );
-    //
-    //         return response.ok;
-    //     } catch (error) {
-    //         console.error("Error starting voting:", error);
-    //         return false;
-    //     }
-    // }, [options.roomId, options.userId]);
-    //
-    // const revealVotes = useCallback(async () => {
-    //     try {
-    //         const response = await fetch(
-    //             `/api/rooms/${options.roomId}/session`,
-    //             {
-    //                 method: "POST",
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                 },
-    //                 body: JSON.stringify({
-    //                     action: "reveal",
-    //                     userId: options.userId,
-    //                 }),
-    //             }
-    //         );
-    //
-    //         return response.ok;
-    //     } catch (error) {
-    //         console.error("Error revealing votes:", error);
-    //         return false;
-    //     }
-    // }, [options.roomId, options.userId]);
-    //
-    // const resetVotes = useCallback(async () => {
-    //     try {
-    //         const response = await fetch(
-    //             `/api/rooms/${options.roomId}/session`,
-    //             {
-    //                 method: "POST",
-    //                 headers: {
-    //                     "Content-Type": "application/json",
-    //                 },
-    //                 body: JSON.stringify({
-    //                     action: "reset",
-    //                     userId: options.userId,
-    //                 }),
-    //             }
-    //         );
-    //
-    //         return response.ok;
-    //     } catch (error) {
-    //         console.error("Error resetting votes:", error);
-    //         return false;
-    //     }
-    // }, [options.roomId, options.userId]);
-
     return {
         room,
+        tasks,
         isConnected,
-        // submitVote,
-        // startVoting,
-        // revealVotes,
-        // resetVotes,
         reconnect: connectSSE,
     };
 };
