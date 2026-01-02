@@ -1,29 +1,27 @@
 "use client";
 
-import React, { useState } from "react";
-import { Grid, Paper, Box, Stack } from "@mui/material";
-
-import { RoomHeader } from "@components/room-header";
-import { Task } from "@/api";
-import { VotingPanel } from "@components/voting-panel/voting-panel";
-import { UsersPanel } from "@components/user-panel/user-panel";
-import { VotingControl } from "@components/voting-control/voting-control";
-import { TaskPanel } from "@components/task-panel/task-panel";
-import { useRoom } from "@/hooks/use-room";
-import { useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Box, CircularProgress } from "@mui/material";
+import { api } from "@/api";
+import { Room } from "@/components/room";
 
 const RoomPage = () => {
     const params = useParams<{ id: string }>();
     const roomId = String(params?.id);
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
 
-    const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-
-    const { room, tasks } = useRoom({
-        roomId,
-        onEvent: (event) => {
-            console.log("Poker event received:", event.type);
-        },
-    });
+    useEffect(() => {
+        (async () => {
+            try {
+                await api.get(`/rooms/${roomId}`);
+                setLoading(false);
+            } catch (_) {
+                router.push(`/${roomId}/join`);
+            }
+        })();
+    }, [roomId]);
 
     return (
         <Box
@@ -38,52 +36,11 @@ const RoomPage = () => {
                 gap: 2,
             }}
         >
-            <RoomHeader title={room?.name || ""} href={window.location.href} />
-
-            <Grid container spacing={2} sx={{ height: "calc(100vh - 100px)" }}>
-                <Grid size="auto">
-                    <Paper
-                        sx={{
-                            p: 2,
-                            height: "100%",
-                            display: "flex",
-                            flexDirection: "column",
-                            overflow: "auto",
-                            minWidth: "360px",
-                        }}
-                    >
-                        <TaskPanel
-                            roomId={roomId}
-                            tasks={tasks || []}
-                            isOwner={!!room?.isOwner}
-                            selectedId={selectedTask?.id || null}
-                            onSelect={setSelectedTask}
-                        />
-                    </Paper>
-                </Grid>
-                <Grid size="grow">
-                    <Paper
-                        sx={{
-                            p: 3,
-                            height: "100%",
-                            display: "flex",
-                        }}
-                    >
-                        <Stack sx={{ gap: 2, width: "100%" }}>
-                            <VotingControl
-                                roomId={roomId}
-                                task={selectedTask}
-                                isOwner={!!room?.isOwner}
-                            />
-                            <UsersPanel users={room?.users || []} />
-                            <VotingPanel
-                                roomId={roomId}
-                                task={selectedTask || null}
-                            />
-                        </Stack>
-                    </Paper>
-                </Grid>
-            </Grid>
+            {loading ? (
+                <CircularProgress style={{ margin: "auto" }} />
+            ) : (
+                <Room roomId={roomId} />
+            )}
         </Box>
     );
 };

@@ -3,15 +3,16 @@
 import { useState } from "react";
 import { Box, Button, Container, TextField, Typography } from "@mui/material";
 import { api, JoinRoomResponse } from "@/api";
+import { useRouter } from "next/navigation";
 
 interface JoinRoomProps {
     roomId: string | null;
-    onJoin: () => void;
 }
 
-export const JoinRoom = ({ roomId, onJoin }: JoinRoomProps) => {
+export const JoinRoom = ({ roomId }: JoinRoomProps) => {
     const [userName, setUserName] = useState("");
     const [isJoining, setIsJoining] = useState(false);
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,7 +24,7 @@ export const JoinRoom = ({ roomId, onJoin }: JoinRoomProps) => {
                 userName: userName.trim(),
             });
 
-            onJoin();
+            router.push(`/${roomId}`);
         } catch (_) {
             alert("Error joining room");
         } finally {
