@@ -15,8 +15,6 @@ export async function POST(
         const { roomId } = await params;
         const { tasks } = await request.json();
 
-        console.log("===> ADD TASKS", roomId, tasks);
-
         const token = await getUserTokenOrError();
         const user = userStore.getUser(token as string);
         const room = getRoomOrError(roomId) as Room;
@@ -26,11 +24,10 @@ export async function POST(
         roomStore.addTasks(roomId, tasks);
 
         sendToRoom(roomId, {
-            type: "new-tasks",
+            type: "task.added",
             data: {
                 tasks: roomStore.getRoomTasks(roomId),
             },
-            timestamp: new Date().toISOString(),
         });
 
         return NextResponse.json(null, { status: 201 });

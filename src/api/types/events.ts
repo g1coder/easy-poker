@@ -1,15 +1,17 @@
+type PokerEventType =
+    | "ping"
+    | "user.joined"
+    | "user.left"
+    | "user.voted" // какой то юзер проголосовал по задаче, отображаем статус
+    | "task.added" // добавлена новая задача, отрисовываем ее у юзеров
+    | "task.revealed" // вскрыты карты для конкретной таски, отправляем юзерам инфу о голосовании
+    | "task.reset"
+    | "task.done"; // морозим голосовалку и отображаем
+
 export interface PokerEvent {
-    type:
-        | "user.ts-joined"
-        | "user.ts-left"
-        | "vote-started"
-        | "vote-received"
-        | "votes-revealed"
-        | "vote-reset"
-        | "new-tasks";
+    type: PokerEventType;
     // eslint-disable-next-line
     data: any;
-    timestamp: string;
 }
 
 export type VoteControlAction = "reveal" | "reset" | "done";

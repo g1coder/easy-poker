@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { Room, roomStore, userStore } from "@/api";
+import { roomStore, userStore } from "@/api";
 import { PokerEvent } from "@/api/types";
 import { getRoomOrError, getUserTokenOrError } from "@api/helpers";
 
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
         return new Response("roomId not found", { status: 404 });
     }
 
-    const room = getRoomOrError(roomId) as Room;
+    getRoomOrError(roomId);
     userStore.setUserConnection(userId, true);
 
     const stream = new ReadableStream({
@@ -36,15 +36,12 @@ export async function GET(request: NextRequest) {
 
             console.log(`🔗 SSE connected: ${clientId}`);
 
-            const roomUsers = roomStore.getRoomUsers(roomId);
             const initialEvent: PokerEvent = {
-                type: "user.ts-joined",
+                type: "user.joined",
                 data: {
-                    room: { ...room, isOwner: room.ownerId === userId },
-                    users: roomUsers,
                     tasks: roomStore.getRoomTasks(roomId),
+                    users: roomStore.getRoomUsers(roomId),
                 },
-                timestamp: new Date().toISOString(),
             };
 
             sendToClient(controller, initialEvent);
@@ -53,9 +50,8 @@ export async function GET(request: NextRequest) {
                 try {
                     if (clients.has(clientId)) {
                         const pingEvent: PokerEvent = {
-                            type: "vote-received",
+                            type: "ping",
                             data: { ping: true },
-                            timestamp: new Date().toISOString(),
                         };
                         sendToClient(controller, pingEvent);
                     } else {
@@ -101,7 +97,7 @@ function sendToClient(
 }
 
 export function sendToRoom(roomId: string, event: PokerEvent) {
-    const message = `data: ${JSON.stringify(event)}\n\n`;
+    const message = `data: ${JSON.stringify({ ...event, timestamp: new Date().toISOString() })}\n\n`;
     const encoder = new TextEncoder();
     const encodedMessage = encoder.encode(message);
 

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendToRoom } from "@/app/api/events/route";
 import { AddRoomTasksRequest, Room, roomStore, userStore } from "@/api";
 import {
     checkIsOwnerOrError,
@@ -7,13 +6,12 @@ import {
     getUserTokenOrError,
 } from "@api/helpers";
 
-export async function POST(
-    request: NextRequest,
+export async function GET(
+    _: NextRequest,
     { params }: { params: Promise<AddRoomTasksRequest> }
 ) {
     try {
         const { roomId } = await params;
-        const { tasks } = await request.json();
 
         const token = await getUserTokenOrError();
         const room = getRoomOrError(roomId) as Room;
@@ -21,17 +19,9 @@ export async function POST(
 
         checkIsOwnerOrError(room, user?.id);
 
-        roomStore.addTasks(roomId, tasks);
+        const tasks = roomStore.getRoomTasks(roomId);
 
-        sendToRoom(roomId, {
-            type: "new-tasks",
-            data: {
-                tasks: roomStore.getRoomTasks(roomId),
-            },
-            timestamp: new Date().toISOString(),
-        });
-
-        return NextResponse.json("", { status: 201 });
+        return NextResponse.json(tasks, { status: 201 });
     } catch (error) {
         return NextResponse.json({ error }, { status: 500 });
     }

@@ -7,10 +7,16 @@ import { User } from "@/api";
 
 interface ParticipantCardProps {
     user: User;
+    voted: boolean;
+    vote: string;
 }
 
-export const ParticipantCard = ({ user }: ParticipantCardProps) => {
-    const { name, voted, vote, connected } = user;
+export const ParticipantCard = ({
+    user,
+    voted,
+    vote,
+}: ParticipantCardProps) => {
+    const { name, id, connected } = user;
 
     const renderContent = () => {
         if (!voted) {

@@ -1,17 +1,19 @@
+import { useContextSelector } from "use-context-selector";
 import { Box, Button, Stack, Tooltip, Typography } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 import RedoIcon from "@mui/icons-material/Redo";
 import DoDisturbIcon from "@mui/icons-material/DoDisturb";
+import { api, RoomDto } from "@/api";
+import { CurrentTaskContext } from "@/providers";
 import styles from "./voting-control.module.scss";
-import { api, Task } from "@/api";
 
 interface VotingPanelProps {
-    roomId: string;
-    task: Task | null;
-    isOwner?: boolean;
+    room: RoomDto;
 }
 
-export const VotingControl = ({ roomId, task, isOwner }: VotingPanelProps) => {
+export const VotingControl = ({ room }: VotingPanelProps) => {
+    const { id: roomId, isOwner } = room;
+    const task = useContextSelector(CurrentTaskContext, (c) => c.currentTask);
     const { link: title, estimate, status } = task || {};
 
     const handleReveal = async () => {

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { ACCESS_TOKEN_NAME, GetRoomRequest, roomStore, userStore } from "@/api";
+import { GetRoomRequest, Room, RoomDto, userStore } from "@/api";
+import { getRoomOrError, getUserTokenOrError } from "@api/helpers";
 
 export async function GET(
     _: NextRequest,
@@ -16,31 +16,21 @@ export async function GET(
             );
         }
 
-        const room = roomStore.getRoom(roomId);
-        if (!room) {
-            return NextResponse.json(
-                { error: `Room ID ${roomId} not found` },
-                { status: 404 }
-            );
-        }
+        const { ownerId, ...rest } = getRoomOrError(roomId) as Room;
+        const token = await getUserTokenOrError();
+        const user = userStore.getUser(token as string);
 
-        const cookieStore = await cookies();
-        const accessToken = cookieStore.get(ACCESS_TOKEN_NAME) as
-            | { value: string }
-            | undefined;
-
-        console.log("===>>", accessToken);
-        const user = accessToken ? userStore.getUser(accessToken.value) : null;
         if (!user) {
             return NextResponse.json(
                 { error: "User not found" },
                 { status: 403 }
             );
         }
-        const response = {
-            ...room,
-            isOwner: room.ownerId === user.id,
-            tasks: roomStore.getRoomTasks(roomId),
+
+        const response: RoomDto = {
+            ...rest,
+            userId: user.id,
+            isOwner: ownerId === user.id,
         };
 
         return NextResponse.json(response, { status: 200 });

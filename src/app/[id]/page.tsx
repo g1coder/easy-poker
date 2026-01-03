@@ -3,20 +3,20 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Box, CircularProgress } from "@mui/material";
-import { api } from "@/api";
+import { api, RoomDto } from "@/api";
 import { Room } from "@/components/room";
 
 const RoomPage = () => {
     const params = useParams<{ id: string }>();
     const roomId = String(params?.id);
     const router = useRouter();
-    const [loading, setLoading] = useState(true);
+    const [room, setRoom] = useState<RoomDto | null>(null);
 
     useEffect(() => {
         (async () => {
             try {
-                await api.get(`/rooms/${roomId}`);
-                setLoading(false);
+                const response = await api.get(`/rooms/${roomId}`);
+                setRoom(response);
             } catch (_) {
                 router.push(`/${roomId}/join`);
             }
@@ -36,10 +36,10 @@ const RoomPage = () => {
                 gap: 2,
             }}
         >
-            {loading ? (
+            {!room ? (
                 <CircularProgress style={{ margin: "auto" }} />
             ) : (
-                <Room roomId={roomId} />
+                <Room room={room} />
             )}
         </Box>
     );

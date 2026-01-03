@@ -16,7 +16,6 @@ class UserStore {
             id: token,
             name: userName,
             connected: true,
-            voted: false,
         };
         this.#userSessionMap.set(token, user);
         return user;
@@ -24,7 +23,6 @@ class UserStore {
 
     public getUser(token: string) {
         console.log("all users", [...this.#userSessionMap.values()]);
-
         console.log("target user.ts", this.#userSessionMap.get(token));
         return this.#userSessionMap.get(token) || null;
     }

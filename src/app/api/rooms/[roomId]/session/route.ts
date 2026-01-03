@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendToRoom } from "@/app/api/events/route";
-import { Room, roomStore, userStore, VoteControlAction } from "@/api";
+import {
+    PokerEvent,
+    Room,
+    roomStore,
+    userStore,
+    VoteControlAction,
+} from "@/api";
 import {
     checkIsOwnerOrError,
     getRoomOrError,
@@ -21,7 +27,7 @@ export async function POST(
 
         checkIsOwnerOrError(room, user?.id);
 
-        let eventData;
+        let eventType: PokerEvent["type"] = "ping";
         let success = false;
 
         switch (action as VoteControlAction) {
@@ -29,24 +35,18 @@ export async function POST(
                 const results = roomStore.revealVotes(roomId, taskId);
                 if (results) {
                     success = true;
-                    eventData = {
-                        task: roomStore.getRoomTask(roomId, taskId),
-                    };
                 }
+                eventType = "task.revealed";
                 break;
 
             case "reset":
                 success = roomStore.resetVotes(roomId, taskId);
-                eventData = {
-                    task: roomStore.getRoomTask(roomId, taskId),
-                };
+                eventType = "task.reset";
                 break;
 
             case "done":
                 success = roomStore.freezeVoting(roomId, taskId);
-                eventData = {
-                    task: roomStore.getRoomTask(roomId, taskId),
-                };
+                eventType = "task.done";
                 break;
 
             default:
@@ -64,14 +64,10 @@ export async function POST(
         }
 
         sendToRoom(roomId, {
-            type:
-                action === "start"
-                    ? "vote-started"
-                    : action === "reveal"
-                      ? "votes-revealed"
-                      : "vote-reset",
-            data: eventData,
-            timestamp: new Date().toISOString(),
+            type: eventType,
+            data: {
+                tasks: roomStore.getRoomTasks(roomId),
+            },
         });
 
         return NextResponse.json({ success: true });

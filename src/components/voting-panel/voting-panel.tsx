@@ -1,24 +1,27 @@
 import { useState } from "react";
 import { Box, Typography } from "@mui/material";
-import { api, TaskDto } from "@/api";
+import { api, RoomDto } from "@/api";
+import { useContextSelector } from "use-context-selector";
 import styles from "./voting-panel.module.scss";
+import { CurrentTaskContext } from "@/providers";
 
 interface VotingPanelProps {
-    roomId: string;
-    task: TaskDto | null;
+    room: RoomDto;
 }
 
 const votes: string[] = ["1", "2", "3", "5", "8", "13", "21", "34", "?", "☕"];
 
-export const VotingPanel = ({ roomId, task }: VotingPanelProps) => {
+export const VotingPanel = ({ room }: VotingPanelProps) => {
+    const { id: roomId, userId } = room;
     const [, setVote] = useState<string>("");
+    const task = useContextSelector(CurrentTaskContext, (c) => c.currentTask);
 
     const handleVote =
         (value: string) => async (e: React.MouseEvent<HTMLDivElement>) => {
             e.preventDefault();
             setVote(value);
-            await api.post(`/rooms/${roomId}/session`, {
-                action: "reveal",
+            await api.post(`/rooms/${roomId}/vote`, {
+                vote: value,
                 taskId: task?.id,
             });
         };
@@ -26,7 +29,7 @@ export const VotingPanel = ({ roomId, task }: VotingPanelProps) => {
     return (
         <div className={styles.container}>
             {votes.map((vote) => {
-                const isSelected = vote === task?.vote;
+                const isSelected = vote === task?.votes[userId];
                 return (
                     <div
                         key={vote}

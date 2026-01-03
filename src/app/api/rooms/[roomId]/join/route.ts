@@ -4,7 +4,6 @@ import { sendToRoom } from "@/app/api/events/route";
 import {
     ACCESS_TOKEN_NAME,
     JoinRoomRequest,
-    Room,
     roomStore,
     userStore,
 } from "@/api";
@@ -15,7 +14,7 @@ export async function POST(
     { params }: { params: Promise<JoinRoomRequest> }
 ) {
     try {
-        const { roomId } = await params;
+        const { roomId, userName: _ } = await params;
         const { userName } = await request.json();
 
         const cookieStore = await cookies();
@@ -30,7 +29,7 @@ export async function POST(
             );
         }
 
-        const room = getRoomOrError(roomId) as Room;
+        getRoomOrError(roomId);
 
         let user = accessToken ? userStore.getUser(accessToken.value) : null;
         if (!user) {
@@ -47,17 +46,13 @@ export async function POST(
 
         roomStore.joinUser(roomId, user);
 
-        // уведомляем всех о новом пользователе
         const roomUsers = roomStore.getRoomUsers(roomId);
-        console.log("======> is owner", room.ownerId, user.id);
-
         sendToRoom(roomId, {
-            type: "user.ts-joined",
+            type: "user.joined",
             data: {
-                room: { ...room, ownerId: room.ownerId === user.id },
+                tasks: roomStore.getRoomTasks(roomId),
                 users: roomUsers,
             },
-            timestamp: new Date().toISOString(),
         });
 
         return NextResponse.json("", { status: 201 });

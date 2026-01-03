@@ -31,12 +31,12 @@ export async function POST(
         }
 
         sendToRoom(roomId, {
-            type: "vote-received",
+            type: "user.voted",
             data: {
                 task: roomStore.getRoomTask(roomId, taskId),
+                tasks: roomStore.getRoomTasks(roomId),
                 votedUserId: user.id,
             },
-            timestamp: new Date().toISOString(),
         });
 
         return NextResponse.json({ success: true });

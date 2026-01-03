@@ -1,16 +1,32 @@
-import React from "react";
 import { Box, Stack, Typography } from "@mui/material";
-import { User } from "@/api";
+import { useContextSelector } from "use-context-selector";
 import { ParticipantCard } from "./user-card";
+import { RoomContext } from "@/providers/room-provider";
+import { RoomDto } from "@/api";
+import { CurrentTaskContext } from "@/providers";
+import { useEffect } from "react";
 
 interface UsersPanelProps {
-    users: User[];
+    room: RoomDto;
 }
 
-export const UsersPanel = ({ users }: UsersPanelProps) => {
-    const onlineCount = users.filter((p) => p.connected).length;
-    const votedCount = users.filter((p) => p.voted).length;
-    const left = onlineCount - votedCount;
+export const UsersPanel = ({ room }: UsersPanelProps) => {
+    // const onlineCount = users.filter((p) => p.connected).length;
+    // const votedCount = users.filter((p) => p.voted).length;
+    const left = 0; //onlineCount - votedCount;
+    const task = useContextSelector(CurrentTaskContext, (c) => c.currentTask);
+    const users = useContextSelector(RoomContext, (c) => c.users);
+
+    console.log("task", task);
+
+    const _users = users.map((user) => {
+        const vote = task?.votes[user.id] || "";
+        return {
+            user,
+            vote,
+            voted: !!vote,
+        };
+    });
 
     return (
         <Box
@@ -37,8 +53,8 @@ export const UsersPanel = ({ users }: UsersPanelProps) => {
             </Stack>
 
             <Stack direction="row" flexWrap="wrap" maxWidth="1000px" gap={4}>
-                {users?.map((item) => (
-                    <ParticipantCard key={item.id} user={item} />
+                {_users?.map((item) => (
+                    <ParticipantCard key={item.user.id} {...item} />
                 ))}
             </Stack>
         </Box>

@@ -1,21 +1,5 @@
-import { Room } from "../types";
-
 export interface GetRoomRequest {
     roomId: string;
-}
-
-export interface GetRoomResponse extends Room {
-    isOwner: boolean;
-}
-
-export interface CreateRoomRequest {
-    roomName: string;
-    ownerName: string;
-}
-
-export interface CreateRoomResponse {
-    roomId: string;
-    isOwner: boolean;
 }
 
 export interface JoinRoomRequest {
@@ -30,4 +14,11 @@ export interface JoinRoomResponse {
 export interface AddRoomTasksRequest {
     roomId: string;
     tasks: string[];
+}
+
+export interface RoomDto {
+    id: string;
+    name: string;
+    isOwner: boolean;
+    userId: string;
 }

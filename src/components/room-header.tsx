@@ -13,19 +13,15 @@ import { ContentCopy } from "@mui/icons-material";
 
 interface RoomHeaderProps {
     title: string;
-    href: string;
 }
 
-export const RoomHeader = ({ title, href }: RoomHeaderProps) => {
+export const RoomHeader = ({ title }: RoomHeaderProps) => {
     const [open, setOpen] = useState(false);
+    const href = window.location.href;
 
     const handleCopy = async () => {
-        try {
-            await navigator.clipboard.writeText(href);
-            setOpen(true);
-        } catch (err) {
-            console.error("Failed to copy text: ", err);
-        }
+        await navigator.clipboard.writeText(href);
+        setOpen(true);
     };
 
     return (

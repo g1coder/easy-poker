@@ -1,15 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { PokerEvent, Task } from "@/api/types";
-import { RoomDto } from "@/api";
+import { PokerEvent, User } from "@/api/types";
+import { TaskDto } from "@/api";
 
 interface UseRoomOptions {
     roomId: string;
-    onEvent?: (event: PokerEvent) => void;
 }
 
 export const useRoom = (options: UseRoomOptions) => {
-    const [room, setRoom] = useState<RoomDto | null>(null);
-    const [tasks, setTasks] = useState<Task[]>([]);
+    const [tasks, setTasks] = useState<TaskDto[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [isConnected, setIsConnected] = useState(false);
 
     const eventSourceRef = useRef<EventSource | null>(null);
@@ -50,35 +49,22 @@ export const useRoom = (options: UseRoomOptions) => {
             es.onmessage = (event) => {
                 try {
                     const pokerEvent: PokerEvent = JSON.parse(event.data);
-
-                    console.log("GOT MSG", pokerEvent);
-
                     if (pokerEvent.data?.ping) return;
-
                     console.log("📨 Poker event:", pokerEvent.type);
 
                     switch (pokerEvent.type) {
-                        case "user.ts-joined":
-                        case "user.ts-left":
-                        case "vote-started":
-                        case "vote-reset":
-                            setRoom(pokerEvent.data.room);
+                        case "user.joined":
+                        case "user.left":
                             setTasks(pokerEvent.data.tasks);
+                            setUsers(pokerEvent.data.users);
                             break;
-
-                        case "vote-received":
-                            setRoom(pokerEvent.data.room);
-                            break;
-
-                        case "votes-revealed":
-                            setRoom(pokerEvent.data.room);
-                            break;
-                        case "new-tasks":
+                        case "user.voted":
+                        case "task.added":
+                        case "task.revealed":
+                        case "task.reset":
+                        case "task.done":
                             setTasks(pokerEvent.data.tasks);
-                            break;
                     }
-
-                    optionsRef.current.onEvent?.(pokerEvent);
                 } catch (error) {
                     console.error("Error parsing poker event:", error);
                 }
@@ -124,8 +110,8 @@ export const useRoom = (options: UseRoomOptions) => {
     }, [connectSSE, disconnectSSE]);
 
     return {
-        room,
         tasks,
+        users,
         isConnected,
         reconnect: connectSSE,
     };

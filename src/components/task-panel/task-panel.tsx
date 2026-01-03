@@ -13,27 +13,24 @@ import styles from "./task-panel.module.scss";
 import { cx } from "@/utils";
 import { AddTask } from "./add-task";
 import { TaskMenu } from "./task-menu";
-import { api, Task } from "@/api";
+import { api, RoomDto } from "@/api";
+import { useContextSelector } from "use-context-selector";
+import { RoomContext, CurrentTaskContext } from "@/providers";
 
 interface TaskPanelProps {
-    roomId: string;
-    tasks: Task[];
-    isOwner: boolean;
-    selectedId: Task["id"] | null;
-    onSelect: (task: Task) => void;
+    room: RoomDto;
 }
 
-export const TaskPanel = ({
-    roomId,
-    tasks,
-    isOwner,
-    selectedId,
-    onSelect,
-}: TaskPanelProps) => {
+export const TaskPanel = ({ room }: TaskPanelProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const tasks = useContextSelector(RoomContext, (c) => c.tasks) || [];
+    const { currentTask, selectTask } = useContextSelector(
+        CurrentTaskContext,
+        (c) => c
+    );
 
     const handleAddTasks = async (value: string[]) => {
-        await api.post(`/rooms/${roomId}/tasks/add`, {
+        await api.post(`/rooms/${room.id}/tasks/add`, {
             tasks: value,
         });
     };
@@ -52,7 +49,7 @@ export const TaskPanel = ({
                     {`TASKS: ${tasks.length}`}
                 </Typography>
 
-                {isOwner && (
+                {room.isOwner && (
                     <Button
                         variant="outlined"
                         size="small"
@@ -74,11 +71,11 @@ export const TaskPanel = ({
                     <Fragment key={task.id}>
                         <ListItem
                             onClick={() => {
-                                onSelect(task);
+                                selectTask(task.id);
                             }}
                             className={cx(
                                 styles.listItem,
-                                task.id === selectedId && styles.selected
+                                task.id === currentTask?.id && styles.selected
                             )}
                             disablePadding
                             secondaryAction={
@@ -118,7 +115,7 @@ export const TaskPanel = ({
                 ))}
             </List>
 
-            {isOwner && (
+            {room.isOwner && (
                 <AddTask
                     open={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
