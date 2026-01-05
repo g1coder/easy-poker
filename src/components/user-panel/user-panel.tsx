@@ -36,25 +36,33 @@ export const UsersPanel = ({ room }: UsersPanelProps) => {
                 border: "1px solid #e5e7eb",
             }}
         >
-            <Stack alignItems="flex-end">
-                {users?.length > 0 && (
-                    <Typography
-                        variant="body1"
-                        fontWeight={600}
-                        color={left ? "warning" : "success"}
-                        sx={{
-                            padding: "0.25rem 1rem",
-                            borderRadius: 1,
-                        }}
-                    >
-                        {left ? `${left} left` : "all voted!"}
-                    </Typography>
-                )}
-            </Stack>
+            {/*<Stack alignItems="flex-end">*/}
+            {/*    {users?.length > 0 && (*/}
+            {/*        <Typography*/}
+            {/*            variant="body1"*/}
+            {/*            fontWeight={600}*/}
+            {/*            color={left ? "warning" : "success"}*/}
+            {/*            sx={{*/}
+            {/*                padding: "0.25rem 1rem",*/}
+            {/*                borderRadius: 1,*/}
+            {/*            }}*/}
+            {/*        >*/}
+            {/*            {left ? `${left} left` : "all voted!"}*/}
+            {/*        </Typography>*/}
+            {/*    )}*/}
+            {/*</Stack>*/}
 
             <Stack direction="row" flexWrap="wrap" maxWidth="1000px" gap={4}>
                 {_users?.map((item) => (
-                    <ParticipantCard key={item.user.id} {...item} />
+                    <ParticipantCard
+                        key={item.user.id}
+                        {...item}
+                        own={room.userId === item.user.id}
+                        reveal={
+                            task?.status === "finished" ||
+                            task?.status === "revealed"
+                        }
+                    />
                 ))}
             </Stack>
         </Box>

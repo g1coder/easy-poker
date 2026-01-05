@@ -76,7 +76,12 @@ class RoomStore {
             throw new Error("Room not found");
         }
 
-        room.users.push(user);
+        const alreadyJoined = room.users.find(
+            (already) => already.id === user.id
+        );
+        if (!alreadyJoined) {
+            room.users.push(user);
+        }
     }
 
     getRoomUsers(roomId: string, connected = true): User[] {
@@ -91,22 +96,21 @@ class RoomStore {
     submitVote(roomId: string, user: User, taskId: string, vote: string) {
         const task = this.getRoomTask(roomId, taskId);
         if (!task || task?.status === "finished") return false;
-        // const roomTasks = this.roomTaskVotes.get(roomId);
-        // if (!roomTasks) {
-        //     const tasks = new Map();
-        //     tasks.set(task.id, { [user.id]: vote });
-        //     this.roomTaskVotes.set(roomId, tasks);
-        // } else {
-        //     const tasks = roomTasks.get(task.id);
-        //     if (tasks) {
-        //         tasks[user.id] = vote;
-        //     }
-        // }
 
-        console.log("========> NEW VOTE", vote);
+        const users = this.getRoomUsers(roomId);
 
         task.status = "voting";
         task.votes[user.id] = vote;
+
+        const estimate = findTaskEstimation(
+            task.votes,
+            users.map((u) => u.id)
+        );
+        if (estimate) {
+            task.status = "finished";
+        }
+
+        task.estimate = estimate;
 
         return true;
     }
@@ -135,8 +139,14 @@ class RoomStore {
 
         const roomTasks = this.roomTaskVotes.get(roomId);
         const taskVotes = roomTasks?.get(taskId) || null;
+        const users = this.getRoomUsers(roomId);
+
         if (taskVotes) {
-            task.estimate = findTaskEstimation(taskVotes);
+            task.estimate = findTaskEstimation(
+                taskVotes,
+                users.map((u) => u.id),
+                true
+            );
         }
 
         return true;

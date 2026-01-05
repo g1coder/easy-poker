@@ -1,5 +1,5 @@
 .listItem {
-    padding: 1rem;
+    padding: 0.5rem;
     border-radius: 0.5rem;
     background-color: #F5F5F5;
     margin-bottom: 0.3rem;
@@ -18,3 +18,18 @@
     background-color: #EFF1FE;
     border: 1px solid var(--mui-palette-primary-light);
 }
+
+.finished {
+    color: #00C92C;
+    border-color: #00C92C;
+}
+
+.revealed {
+    color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.voting {
+    color: red;
+}
+

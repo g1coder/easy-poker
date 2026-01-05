@@ -9,7 +9,7 @@ interface VotingPanelProps {
     room: RoomDto;
 }
 
-const votes: string[] = ["1", "2", "3", "5", "8", "13", "21", "34", "?", "☕"];
+const votes: string[] = ["1", "2", "3", "5", "8", "13", "21", "34"];
 
 export const VotingPanel = ({ room }: VotingPanelProps) => {
     const { id: roomId, userId } = room;
@@ -19,12 +19,21 @@ export const VotingPanel = ({ room }: VotingPanelProps) => {
     const handleVote =
         (value: string) => async (e: React.MouseEvent<HTMLDivElement>) => {
             e.preventDefault();
+
+            if (task?.status === "finished") {
+                return;
+            }
+
             setVote(value);
             await api.post(`/rooms/${roomId}/vote`, {
                 vote: value,
                 taskId: task?.id,
             });
         };
+
+    if (!task) {
+        return null;
+    }
 
     return (
         <div className={styles.container}>

@@ -75,7 +75,8 @@ export const TaskPanel = ({ room }: TaskPanelProps) => {
                             }}
                             className={cx(
                                 styles.listItem,
-                                task.id === currentTask?.id && styles.selected
+                                task.id === currentTask?.id && styles.selected,
+                                task.status === "finished" && styles.finished
                             )}
                             disablePadding
                             secondaryAction={
@@ -87,7 +88,6 @@ export const TaskPanel = ({ room }: TaskPanelProps) => {
                                     <Typography
                                         variant="body1"
                                         fontWeight={700}
-                                        color="primary"
                                     >
                                         {task.estimate}
                                     </Typography>
@@ -104,10 +104,18 @@ export const TaskPanel = ({ room }: TaskPanelProps) => {
                                             gap: 1,
                                         }}
                                     >
-                                        <Typography variant="body2">
+                                        <Typography variant="body1">
                                             {task.link}
                                         </Typography>
                                     </Box>
+                                }
+                                secondary={
+                                    <Typography
+                                        className={styles[task.status]}
+                                        variant="body2"
+                                    >
+                                        {task.status}
+                                    </Typography>
                                 }
                             />
                         </ListItem>
