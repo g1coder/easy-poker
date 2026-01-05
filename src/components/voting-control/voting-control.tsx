@@ -1,6 +1,5 @@
 import { useContextSelector } from "use-context-selector";
-import { Box, Button, Stack, Tooltip, Typography } from "@mui/material";
-import DoneIcon from "@mui/icons-material/Done";
+import { Box, Button, Stack, Typography } from "@mui/material";
 import RedoIcon from "@mui/icons-material/Redo";
 import DoDisturbIcon from "@mui/icons-material/DoDisturb";
 import { api, RoomDto } from "@/api";
@@ -30,14 +29,6 @@ export const VotingControl = ({ room }: VotingPanelProps) => {
         });
     };
 
-    const handleFinish = async () => {
-        await api.post(`/rooms/${roomId}/session`, {
-            action: "done",
-            taskId: task?.id,
-        });
-    };
-
-    const isFinished = status === "finished";
     return (
         <>
             <Box className={styles.container}>
@@ -45,7 +36,13 @@ export const VotingControl = ({ room }: VotingPanelProps) => {
                     <Typography variant="caption" color="text.secondary">
                         CURRENT TASK
                     </Typography>
-                    <Typography variant="h5" component="a" href={title}>
+                    <Typography
+                        variant="h5"
+                        component="a"
+                        href={title}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
                         {title}
                     </Typography>
                 </Stack>
@@ -59,46 +56,48 @@ export const VotingControl = ({ room }: VotingPanelProps) => {
                 </Stack>
             </Box>
             {isOwner && task && (
-                <Stack
-                    direction="row"
-                    justifyContent="space-between"
-                    mt={1}
-                    gap={1}
-                >
-                    <Box>
-                        {status !== "revealed" ? (
-                            <Button
-                                variant="contained"
-                                startIcon={<RedoIcon />}
-                                onClick={handleReveal}
-                            >
-                                Reveal cards
-                            </Button>
-                        ) : (
-                            <Button
-                                variant="outlined"
-                                startIcon={<DoDisturbIcon />}
-                                color="warning"
-                                sx={{
-                                    ml: 1,
-                                }}
-                                onClick={handleReset}
-                            >
-                                Reset votes
-                            </Button>
-                        )}
-                    </Box>
-                    <Tooltip title="Freeze voting">
-                        <Button
-                            variant={"outlined"}
-                            color={isFinished ? "error" : "primary"}
-                            startIcon={!isFinished && <DoneIcon />}
-                            onClick={isFinished ? handleReset : handleFinish}
-                        >
-                            {isFinished ? "Re-voiting" : "Done"}
-                        </Button>
-                    </Tooltip>
-                </Stack>
+                <>
+                    <Stack
+                        direction="row"
+                        justifyContent="space-between"
+                        mt={1}
+                        gap={1}
+                    >
+                        <Box>
+                            {status !== "revealed" ? (
+                                <Button
+                                    variant="contained"
+                                    startIcon={<RedoIcon />}
+                                    onClick={handleReveal}
+                                >
+                                    Reveal cards
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="outlined"
+                                    startIcon={<DoDisturbIcon />}
+                                    color="warning"
+                                    sx={{
+                                        ml: 1,
+                                    }}
+                                    onClick={handleReset}
+                                >
+                                    Reset votes
+                                </Button>
+                            )}
+                        </Box>
+                        {/*<Tooltip title="Freeze voting">*/}
+                        {/*    <Button*/}
+                        {/*        variant={"outlined"}*/}
+                        {/*        color={isFinished ? "error" : "primary"}*/}
+                        {/*        startIcon={!isFinished && <DoneIcon />}*/}
+                        {/*        onClick={isFinished ? handleReset : handleFinish}*/}
+                        {/*    >*/}
+                        {/*        {isFinished ? "Re-voiting" : "Done"}*/}
+                        {/*    </Button>*/}
+                        {/*</Tooltip>*/}
+                    </Stack>
+                </>
             )}
         </>
     );

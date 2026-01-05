@@ -16,9 +16,15 @@ export interface AddRoomTasksRequest {
     tasks: string[];
 }
 
+export interface SetupRoomRequest {
+    roomId: string;
+    skipVote: boolean;
+}
+
 export interface RoomDto {
     id: string;
     name: string;
     isOwner: boolean;
     userId: string;
+    skipVote: boolean;
 }

@@ -17,8 +17,6 @@ export const UsersPanel = ({ room }: UsersPanelProps) => {
     const task = useContextSelector(CurrentTaskContext, (c) => c.currentTask);
     const users = useContextSelector(RoomContext, (c) => c.users);
 
-    console.log("task", task);
-
     const _users = users.map((user) => {
         const vote = task?.votes[user.id] || "";
         return {
@@ -53,11 +51,12 @@ export const UsersPanel = ({ room }: UsersPanelProps) => {
             {/*</Stack>*/}
 
             <Stack direction="row" flexWrap="wrap" maxWidth="1000px" gap={4}>
-                {_users?.map((item) => (
+                {_users?.map((item, idx) => (
                     <ParticipantCard
                         key={item.user.id}
                         {...item}
                         own={room.userId === item.user.id}
+                        skipVote={idx === 0 && room.skipVote}
                         reveal={
                             task?.status === "finished" ||
                             task?.status === "revealed"

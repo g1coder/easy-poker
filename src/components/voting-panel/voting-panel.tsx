@@ -15,12 +15,13 @@ export const VotingPanel = ({ room }: VotingPanelProps) => {
     const { id: roomId, userId } = room;
     const [, setVote] = useState<string>("");
     const task = useContextSelector(CurrentTaskContext, (c) => c.currentTask);
+    const canVoting = task?.status === "waiting" || task?.status === "voting";
 
     const handleVote =
         (value: string) => async (e: React.MouseEvent<HTMLDivElement>) => {
             e.preventDefault();
 
-            if (task?.status === "finished") {
+            if (!canVoting) {
                 return;
             }
 
@@ -45,7 +46,7 @@ export const VotingPanel = ({ room }: VotingPanelProps) => {
                         className={`
                         ${styles.card} 
                         ${isSelected ? styles.selected : ""} 
-                        ${task?.status === "finished" ? styles.disabled : ""}
+                        ${!canVoting ? styles.disabled : ""}
                       `}
                         role="button"
                         tabIndex={0}

@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
             | { value: string }
             | undefined;
 
-        const { roomName, ownerName } = await request.json();
+        const { roomName, ownerName, skipVote } = await request.json();
 
         if (!roomName || (!accessToken?.value && !ownerName)) {
             return NextResponse.json(
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
                 path: "/",
             });
         }
-        const room = roomStore.createRoom(roomName, user);
+        const room = roomStore.createRoom(roomName, user, { skipVote });
         const response = {
             ...room,
             isOwner: room.ownerId === user.id,

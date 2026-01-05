@@ -11,6 +11,7 @@ interface ParticipantCardProps {
     vote: string;
     own: boolean;
     reveal: boolean;
+    skipVote: boolean;
 }
 
 export const ParticipantCard = ({
@@ -19,10 +20,19 @@ export const ParticipantCard = ({
     vote,
     own,
     reveal,
+    skipVote,
 }: ParticipantCardProps) => {
     const { name, connected } = user;
 
     const renderContent = () => {
+        if (skipVote) {
+            return (
+                <Typography variant="h4" color="primary">
+                    ☕
+                </Typography>
+            );
+        }
+
         if (!voted) {
             return <MoreHorizIcon fontSize="large" color="action" />;
         }

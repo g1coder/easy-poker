@@ -13,6 +13,8 @@ interface RoomProps {
 }
 
 export const Room = ({ room }: RoomProps) => {
+    const skipVoting = !(room.isOwner && room.skipVote);
+
     return (
         <RoomProvider roomId={room.id}>
             <CurrentTaskProvider>
@@ -47,7 +49,7 @@ export const Room = ({ room }: RoomProps) => {
                             <Stack sx={{ gap: 2, width: "100%" }}>
                                 <VotingControl room={room} />
                                 <UsersPanel room={room} />
-                                <VotingPanel room={room} />
+                                {skipVoting && <VotingPanel room={room} />}
                             </Stack>
                         </Paper>
                     </Grid>

@@ -8,13 +8,18 @@ import {
     Typography,
     Container,
     CircularProgress,
+    Checkbox,
+    FormControlLabel,
 } from "@mui/material";
 import { api, Room } from "@/api";
 import { useRouter } from "next/navigation";
+import PersonOffOutlined from "@mui/icons-material/PersonOffOutlined";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
 
 export const CreateRoom = () => {
     const [roomName, setRoomName] = useState("");
     const [ownerName, setOwnerName] = useState("");
+    const [skipVote, setSkipVote] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
     const router = useRouter();
 
@@ -28,6 +33,7 @@ export const CreateRoom = () => {
             const response = await api.post<Room>("/rooms", {
                 roomName: roomName.trim(),
                 ownerName: ownerName.trim(),
+                skipVote,
             });
 
             router.push(`/${response.id}`);
@@ -78,6 +84,31 @@ export const CreateRoom = () => {
                         value={roomName}
                         onChange={(e) => setRoomName(e.target.value)}
                         placeholder="Enter room name"
+                    />
+
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={skipVote}
+                                onChange={(event) => {
+                                    setSkipVote(event.target.checked);
+                                }}
+                                color={skipVote ? "warning" : "primary"}
+                                icon={<PersonOutlined />}
+                                checkedIcon={<PersonOffOutlined />}
+                            />
+                        }
+                        label={
+                            <Typography
+                                variant="body2"
+                                fontWeight={500}
+                                color={skipVote ? "error" : "primary"}
+                            >
+                                {skipVote
+                                    ? "Owner will not vote"
+                                    : "Owner can vote"}
+                            </Typography>
+                        }
                     />
 
                     <Button

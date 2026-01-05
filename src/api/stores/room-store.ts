@@ -5,12 +5,12 @@ import { findTaskEstimation } from "@utils/find-task-estimation";
 class RoomStore {
     private rooms: Map<string, Room> = new Map();
     private roomTasks: Map<string, Task[]> = new Map();
-    private roomTaskVotes: Map<
-        string,
-        Map<Task["id"], Record<string, string>>
-    > = new Map(); // roomId -> { taskId -> userId => estimate }
 
-    createRoom(roomName: string, owner: User): Room {
+    createRoom(
+        roomName: string,
+        owner: User,
+        options?: { skipVote?: boolean }
+    ): Room {
         const roomId = randomUUID();
         const room: Room = {
             id: roomId,
@@ -18,6 +18,7 @@ class RoomStore {
             ownerId: owner.id,
             status: "waiting",
             users: [owner],
+            skipVote: options?.skipVote ?? false,
         };
 
         this.rooms.set(roomId, room);
@@ -36,6 +37,20 @@ class RoomStore {
     getRoomTask(roomId: string, taskId: string) {
         const tasks = this.roomTasks.get(roomId) || [];
         return tasks.find((task) => task.id === taskId) || null;
+    }
+
+    changeRoomSettings(roomId: string, settings: Partial<Room>) {
+        const room = this.getRoom(roomId);
+
+        if (!room) {
+            throw new Error("Room not found");
+        }
+
+        if (settings.skipVote) {
+            room.skipVote = settings.skipVote;
+        }
+
+        return true;
     }
 
     addTasks(roomId: string, newTasks: string[]) {
@@ -95,7 +110,8 @@ class RoomStore {
 
     submitVote(roomId: string, user: User, taskId: string, vote: string) {
         const task = this.getRoomTask(roomId, taskId);
-        if (!task || task?.status === "finished") return false;
+        if (!task || task?.status === "finished" || task?.status === "revealed")
+            return false;
 
         const users = this.getRoomUsers(roomId);
 
@@ -119,11 +135,6 @@ class RoomStore {
         const task = this.getRoomTask(roomId, taskId);
         if (!task) return false;
 
-        const taskVotes = this.roomTaskVotes.get(roomId);
-        if (taskVotes) {
-            taskVotes.delete(task.id);
-        }
-
         task.status = "waiting";
         task.votes = {};
         task.estimate = null;
@@ -137,13 +148,10 @@ class RoomStore {
 
         task.status = "revealed";
 
-        const roomTasks = this.roomTaskVotes.get(roomId);
-        const taskVotes = roomTasks?.get(taskId) || null;
-        const users = this.getRoomUsers(roomId);
-
-        if (taskVotes) {
+        if (!task.estimate) {
+            const users = this.getRoomUsers(roomId);
             task.estimate = findTaskEstimation(
-                taskVotes,
+                task.votes,
                 users.map((u) => u.id),
                 true
             );

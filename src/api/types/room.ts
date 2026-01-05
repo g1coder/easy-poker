@@ -6,4 +6,5 @@ export interface Room {
     status: "waiting" | "voting" | "revealed";
     ownerId: string;
     users: User[];
+    skipVote: boolean;
 }
