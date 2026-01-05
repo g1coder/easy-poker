@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendToRoom } from "@/app/api/events/route";
-import { AddRoomTasksRequest, Room, roomStore, userStore } from "@/api";
+import { Room, roomStore, userStore } from "@/api";
 import {
     checkIsOwnerOrError,
     getRoomOrError,
@@ -9,7 +9,7 @@ import {
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: Promise<AddRoomTasksRequest> }
+    { params }: { params: Promise<{ roomId: string }> }
 ) {
     try {
         const { roomId } = await params;

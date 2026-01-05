@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { sendHidedTaskToRoom, sendToRoom } from "@/app/api/events/route";
-import {
-    ACCESS_TOKEN_NAME,
-    JoinRoomRequest,
-    roomStore,
-    userStore,
-} from "@/api";
-import { getRoomOrError, hideTaskVotes } from "@api/helpers";
+import { sendHidedTaskToRoom } from "@/app/api/events/route";
+import { ACCESS_TOKEN_NAME, roomStore, userStore } from "@/api";
+import { getRoomOrError } from "@api/helpers";
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: Promise<JoinRoomRequest> }
+    { params }: { params: Promise<{ roomId: string }> }
 ) {
     try {
-        const { roomId, userName: _ } = await params;
+        const { roomId } = await params;
         const { userName } = await request.json();
 
         const cookieStore = await cookies();
