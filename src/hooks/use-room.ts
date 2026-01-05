@@ -50,7 +50,6 @@ export const useRoom = (options: UseRoomOptions) => {
                 try {
                     const pokerEvent: PokerEvent = JSON.parse(event.data);
                     if (pokerEvent.data?.ping) return;
-                    console.log("📨 Poker event:", pokerEvent.type);
 
                     switch (pokerEvent.type) {
                         case "user.joined":

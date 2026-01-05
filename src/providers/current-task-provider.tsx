@@ -38,7 +38,6 @@ export const CurrentTaskProvider: FC<PropsWithChildren> = ({ children }) => {
 
     useEffect(() => {
         if (task) {
-            console.log("select task", task);
             selectTaskHandler(task?.id);
         }
     }, [tasks, selectTaskHandler]);

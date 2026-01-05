@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendToRoom } from "@/app/api/events/route";
+import { sendHidedTaskToRoom } from "@/app/api/events/route";
 import { roomStore, userStore } from "@/api";
 import { getUserTokenOrError } from "@api/helpers";
 
@@ -30,14 +30,9 @@ export async function POST(
             );
         }
 
-        sendToRoom(roomId, {
-            type: "user.voted",
-            data: {
-                task: roomStore.getRoomTask(roomId, taskId),
-                tasks: roomStore.getRoomTasks(roomId),
-                votedUserId: user.id,
-            },
-        });
+        const tasks = roomStore.getRoomTasks(roomId);
+
+        sendHidedTaskToRoom(roomId, { type: "user.voted", data: { tasks } });
 
         return NextResponse.json({ success: true });
     } catch (error) {

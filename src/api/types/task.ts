@@ -11,6 +11,4 @@ export interface Task {
     status: "waiting" | "voting" | "revealed" | "finished";
     preEstimate: number | null;
     votes: Record<string, string>; // userId -> voited
-    // owner only
-    userVotes: Record<string, number>; // userId -> vote
 }

@@ -1,7 +1,11 @@
 import { NextRequest } from "next/server";
 import { roomStore, userStore } from "@/api";
 import { PokerEvent } from "@/api/types";
-import { getRoomOrError, getUserTokenOrError } from "@api/helpers";
+import {
+    getRoomOrError,
+    getUserTokenOrError,
+    hideTaskVotes,
+} from "@api/helpers";
 
 const clients = new Map<
     string,
@@ -39,7 +43,10 @@ export async function GET(request: NextRequest) {
             const initialEvent: PokerEvent = {
                 type: "user.joined",
                 data: {
-                    tasks: roomStore.getRoomTasks(roomId),
+                    tasks: hideTaskVotes(
+                        roomStore.getRoomTasks(roomId),
+                        userId
+                    ),
                     users: roomStore.getRoomUsers(roomId),
                 },
             };
@@ -105,6 +112,39 @@ export function sendToRoom(roomId: string, event: PokerEvent) {
 
     clients.forEach((client, clientId) => {
         if (client.roomId === roomId) {
+            try {
+                client.controller.enqueue(encodedMessage);
+                sentCount++;
+            } catch (error) {
+                console.error(`Error sending to client ${clientId}:`, error);
+                clients.delete(clientId);
+            }
+        }
+    });
+
+    console.log(
+        `📤 Sent ${event.type} to ${sentCount} clients in room ${roomId}`
+    );
+}
+
+export function sendHidedTaskToRoom(roomId: string, event: PokerEvent) {
+    let sentCount = 0;
+
+    clients.forEach((client, clientId) => {
+        if (client.roomId === roomId) {
+            const payload = {
+                ...event,
+                data: {
+                    ...event.data,
+                    tasks: hideTaskVotes(event.data.tasks, client.userId),
+                },
+                timestamp: new Date().toISOString(),
+            };
+
+            const message = `data: ${JSON.stringify(payload)}\n\n`;
+            const encoder = new TextEncoder();
+            const encodedMessage = encoder.encode(message);
+
             try {
                 client.controller.enqueue(encodedMessage);
                 sentCount++;

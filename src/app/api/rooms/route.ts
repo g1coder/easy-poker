@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { ACCESS_TOKEN_NAME, roomStore, userStore } from "@/api";
+import { hideTaskVotes } from "@api/helpers";
 
 export async function POST(request: NextRequest) {
     try {
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
         const response = {
             ...room,
             isOwner: room.ownerId === user.id,
-            tasks: roomStore.getRoomTasks(room.id),
+            tasks: hideTaskVotes(roomStore.getRoomTasks(room.id), user?.id),
         };
 
         return NextResponse.json(response, { status: 201 });

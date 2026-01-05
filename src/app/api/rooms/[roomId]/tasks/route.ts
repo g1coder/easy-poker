@@ -4,6 +4,7 @@ import {
     checkIsOwnerOrError,
     getRoomOrError,
     getUserTokenOrError,
+    hideTaskVotes,
 } from "@api/helpers";
 
 export async function GET(
@@ -19,7 +20,7 @@ export async function GET(
 
         checkIsOwnerOrError(room, user?.id);
 
-        const tasks = roomStore.getRoomTasks(roomId);
+        const tasks = hideTaskVotes(roomStore.getRoomTasks(roomId), user?.id);
 
         return NextResponse.json(tasks, { status: 201 });
     } catch (error) {

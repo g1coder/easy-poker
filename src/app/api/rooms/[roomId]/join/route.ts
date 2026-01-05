@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { sendToRoom } from "@/app/api/events/route";
+import { sendHidedTaskToRoom, sendToRoom } from "@/app/api/events/route";
 import {
     ACCESS_TOKEN_NAME,
     JoinRoomRequest,
     roomStore,
     userStore,
 } from "@/api";
-import { getRoomOrError } from "@api/helpers";
+import { getRoomOrError, hideTaskVotes } from "@api/helpers";
 
 export async function POST(
     request: NextRequest,
@@ -46,12 +46,11 @@ export async function POST(
 
         roomStore.joinUser(roomId, user);
 
-        const roomUsers = roomStore.getRoomUsers(roomId);
-        sendToRoom(roomId, {
+        sendHidedTaskToRoom(roomId, {
             type: "user.joined",
             data: {
                 tasks: roomStore.getRoomTasks(roomId),
-                users: roomUsers,
+                users: roomStore.getRoomUsers(roomId),
             },
         });
 

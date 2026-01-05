@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { ACCESS_TOKEN_NAME, Room, roomStore } from "@/api";
+import { ACCESS_TOKEN_NAME, Room, roomStore, Task, User } from "@/api";
 import { NextResponse } from "next/server";
 
 const setNewUserCookies = async (userId: string) => {
@@ -52,12 +52,35 @@ export const checkIsOwnerOrError = (room: Room, userId: string | undefined) => {
     }
 };
 
-export const ApiHelper = {
-    setNewUserCookies,
-    getUserToken,
-    getUserTokenOrError,
-    getRoomOrError,
-    checkIsOwnerOrError,
+export const hideTaskVotes = (
+    tasks: Task[],
+    askingUser: User["id"] | undefined
+) => {
+    return tasks.map((task) => {
+        const { votes, ...rest } = task;
+
+        if (task.status === "revealed") {
+            return task;
+        }
+
+        console.log("hide FOR", askingUser);
+        console.log("VOTES", votes);
+
+        const hidedVotes = Object.entries(votes).reduce(
+            (acc, [userId, vote]) => {
+                if (userId === askingUser) {
+                    acc[askingUser] = vote;
+                } else {
+                    acc[userId] = "?";
+                }
+
+                return acc;
+            },
+            {} as Record<string, string>
+        );
+
+        return { ...rest, votes: hidedVotes };
+    });
 };
 
 export const getBaseUrl = () => {

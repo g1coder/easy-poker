@@ -26,7 +26,6 @@ class RoomStore {
     }
 
     getRoom(roomId: string) {
-        console.log("all rooms", [...this.rooms.values()]);
         return this.rooms.get(roomId);
     }
 
@@ -65,7 +64,6 @@ class RoomStore {
             estimate: null,
             preEstimate: null,
             votes: {},
-            userVotes: {},
             status: "waiting",
         }));
 
