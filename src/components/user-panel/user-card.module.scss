@@ -1,0 +1,33 @@
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  width: 120px;
+  height: 100px;
+  position: relative;
+}
+
+.cirle {
+  box-sizing: border-box;
+  width: 8px;
+  height: 8px;
+  background-color: #00C92C;
+  border-radius: 999px;
+  margin-right: 4px;
+}
+
+.you {
+  position: absolute;
+  bottom: 0;
+  color: white;
+  background-color: #00C92C;
+  text-align: center;
+  max-width: fit-content;
+  padding: 0 1rem;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}

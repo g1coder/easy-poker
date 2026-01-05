@@ -22,9 +22,12 @@
             "@/*": ["./src/*"],
             "@api/*": ["./src/api/*"],
             "@lib/*": ["./src/lib/*"],
+            "@utils/*": ["./src/utils/*"],
             "@types/*": ["./src/types/*"],
             "@components/*": ["./src/components/*"]
-        }
+        },
+        "sourceMap": true,
+        "inlineSources": true
     },
     "include": [
         "next-env.d.ts",

@@ -1,0 +1,35 @@
+.listItem {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background-color: #F5F5F5;
+    margin-bottom: 0.3rem;
+    cursor: pointer;
+
+    transition-property: background-color, color, border-color, transform, box-shadow;
+    transition-duration: 0.5s;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+        background-color: #EFF1FE;
+    }
+}
+
+.selected {
+    background-color: #EFF1FE;
+    border: 1px solid var(--mui-palette-primary-light);
+}
+
+.finished {
+    color: #00C92C;
+    border-color: #00C92C;
+}
+
+.revealed {
+    color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.voting {
+    color: red;
+}
+

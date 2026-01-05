@@ -1,5 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 
+export const ACCESS_TOKEN_NAME = "access_token";
+
 const apiPrefix = "api";
 
 const axiosInstance = axios.create({

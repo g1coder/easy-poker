@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { roomManager } from "@lib/rooms";
 import { sendToRoom } from "@/app/api/events/route";
+import {
+    PokerEvent,
+    Room,
+    roomStore,
+    userStore,
+    VoteControlAction,
+} from "@/api";
+import {
+    checkIsOwnerOrError,
+    getRoomOrError,
+    getUserTokenOrError,
+} from "@api/helpers";
 
 export async function POST(
     request: NextRequest,
@@ -8,62 +19,34 @@ export async function POST(
 ) {
     try {
         const { roomId } = await params;
-        const { action, userId } = await request.json();
+        const { action, taskId } = await request.json();
 
-        if (!action || !userId) {
-            return NextResponse.json(
-                { error: "Action and user ID are required" },
-                { status: 400 }
-            );
-        }
+        const token = await getUserTokenOrError();
+        const room = getRoomOrError(roomId) as Room;
+        const user = userStore.getUser(token as string);
 
-        const room = roomManager.getRoom(roomId);
-        if (!room) {
-            return NextResponse.json(
-                { error: "Room not found" },
-                { status: 404 }
-            );
-        }
+        checkIsOwnerOrError(room, user?.id);
 
-        // Проверяем права владельца
-        if (room.ownerId !== userId) {
-            return NextResponse.json(
-                { error: "Only room owner can perform this action" },
-                { status: 403 }
-            );
-        }
-
-        let eventData;
+        let eventType: PokerEvent["type"] = "ping";
         let success = false;
 
-        switch (action) {
-            case "start":
-                success = roomManager.startVoting(roomId);
-                eventData = {
-                    room: roomManager.getRoom(roomId),
-                    users: roomManager.getRoomUsers(roomId),
-                };
-                break;
-
+        switch (action as VoteControlAction) {
             case "reveal":
-                const results = roomManager.revealVotes(roomId);
+                const results = roomStore.revealVotes(roomId, taskId);
                 if (results) {
                     success = true;
-                    eventData = {
-                        room: roomManager.getRoom(roomId),
-                        users: roomManager.getRoomUsers(roomId),
-                        results,
-                        average: roomManager.getRoom(roomId)?.average,
-                    };
                 }
+                eventType = "task.revealed";
                 break;
 
             case "reset":
-                success = roomManager.resetVotes(roomId);
-                eventData = {
-                    room: roomManager.getRoom(roomId),
-                    users: roomManager.getRoomUsers(roomId),
-                };
+                success = roomStore.resetVotes(roomId, taskId);
+                eventType = "task.reset";
+                break;
+
+            case "done":
+                success = roomStore.freezeVoting(roomId, taskId);
+                eventType = "task.done";
                 break;
 
             default:
@@ -80,24 +63,15 @@ export async function POST(
             );
         }
 
-        // Отправляем событие всем участникам
         sendToRoom(roomId, {
-            type:
-                action === "start"
-                    ? "vote-started"
-                    : action === "reveal"
-                      ? "votes-revealed"
-                      : "vote-reset",
-            data: eventData,
-            timestamp: new Date().toISOString(),
+            type: eventType,
+            data: {
+                tasks: roomStore.getRoomTasks(roomId),
+            },
         });
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("Error managing session:", error);
-        return NextResponse.json(
-            { error: "Internal server error" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error }, { status: 500 });
     }
 }

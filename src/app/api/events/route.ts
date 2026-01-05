@@ -1,6 +1,11 @@
 import { NextRequest } from "next/server";
-import { roomManager } from "@/lib/rooms";
-import { PokerEvent } from "@/types";
+import { roomStore, userStore } from "@/api";
+import { PokerEvent } from "@/api/types";
+import {
+    getRoomOrError,
+    getUserTokenOrError,
+    hideTaskVotes,
+} from "@api/helpers";
 
 const clients = new Map<
     string,
@@ -13,20 +18,15 @@ const clients = new Map<
 
 export async function GET(request: NextRequest) {
     const roomId = request.nextUrl.searchParams.get("roomId");
-    const userId = request.nextUrl.searchParams.get("userId");
+    const token = await getUserTokenOrError();
+    const userId = userStore.getUser(token as string)?.id as string;
 
-    if (!roomId || !userId) {
-        return new Response("Missing roomId or userId", { status: 400 });
+    if (!roomId) {
+        return new Response("roomId not found", { status: 404 });
     }
 
-    // Проверяем существование комнаты
-    const room = roomManager.getRoom(roomId);
-    if (!room) {
-        return new Response("Room not found", { status: 404 });
-    }
-
-    // Обновляем статус подключения пользователя
-    roomManager.setUserConnection(userId, true);
+    getRoomOrError(roomId);
+    userStore.setUserConnection(userId, true);
 
     const stream = new ReadableStream({
         start(controller) {
@@ -40,27 +40,25 @@ export async function GET(request: NextRequest) {
 
             console.log(`🔗 SSE connected: ${clientId}`);
 
-            // Отправляем начальное состояние
-            const roomUsers = roomManager.getRoomUsers(roomId);
             const initialEvent: PokerEvent = {
-                type: "user-joined",
+                type: "user.joined",
                 data: {
-                    room,
-                    users: roomUsers,
+                    tasks: hideTaskVotes(
+                        roomStore.getRoomTasks(roomId),
+                        userId
+                    ),
+                    users: roomStore.getRoomUsers(roomId),
                 },
-                timestamp: new Date().toISOString(),
             };
 
             sendToClient(controller, initialEvent);
 
-            // Ping каждые 30 секунд
             const pingInterval = setInterval(() => {
                 try {
                     if (clients.has(clientId)) {
                         const pingEvent: PokerEvent = {
-                            type: "vote-received",
+                            type: "ping",
                             data: { ping: true },
-                            timestamp: new Date().toISOString(),
                         };
                         sendToClient(controller, pingEvent);
                     } else {
@@ -71,19 +69,18 @@ export async function GET(request: NextRequest) {
                 }
             }, 30000);
 
-            // Обработка отключения
             request.signal.addEventListener("abort", () => {
                 console.log(`🔴 SSE disconnected: ${clientId}`);
                 clearInterval(pingInterval);
                 clients.delete(clientId);
-                roomManager.setUserConnection(userId, false);
+                userStore.setUserConnection(userId, false);
             });
         },
 
         cancel() {
             console.log(`❌ SSE stream cancelled for user ${userId}`);
             clients.delete(`${roomId}-${userId}`);
-            roomManager.setUserConnection(userId, false);
+            userStore.setUserConnection(userId, false);
         },
     });
 
@@ -107,7 +104,7 @@ function sendToClient(
 }
 
 export function sendToRoom(roomId: string, event: PokerEvent) {
-    const message = `data: ${JSON.stringify(event)}\n\n`;
+    const message = `data: ${JSON.stringify({ ...event, timestamp: new Date().toISOString() })}\n\n`;
     const encoder = new TextEncoder();
     const encodedMessage = encoder.encode(message);
 
@@ -115,6 +112,39 @@ export function sendToRoom(roomId: string, event: PokerEvent) {
 
     clients.forEach((client, clientId) => {
         if (client.roomId === roomId) {
+            try {
+                client.controller.enqueue(encodedMessage);
+                sentCount++;
+            } catch (error) {
+                console.error(`Error sending to client ${clientId}:`, error);
+                clients.delete(clientId);
+            }
+        }
+    });
+
+    console.log(
+        `📤 Sent ${event.type} to ${sentCount} clients in room ${roomId}`
+    );
+}
+
+export function sendHidedTaskToRoom(roomId: string, event: PokerEvent) {
+    let sentCount = 0;
+
+    clients.forEach((client, clientId) => {
+        if (client.roomId === roomId) {
+            const payload = {
+                ...event,
+                data: {
+                    ...event.data,
+                    tasks: hideTaskVotes(event.data.tasks, client.userId),
+                },
+                timestamp: new Date().toISOString(),
+            };
+
+            const message = `data: ${JSON.stringify(payload)}\n\n`;
+            const encoder = new TextEncoder();
+            const encodedMessage = encoder.encode(message);
+
             try {
                 client.controller.enqueue(encodedMessage);
                 sentCount++;

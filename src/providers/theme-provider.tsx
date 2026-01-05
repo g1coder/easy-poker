@@ -6,6 +6,15 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 const theme = createTheme({
     cssVariables: true,
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    textTransform: "none",
+                },
+            },
+        },
+    },
 });
 
 export const ThemeProvider = ({ children }: PropsWithChildren) => {
@@ -15,12 +24,10 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
         setMounted(true);
     }, []);
 
-    if (!mounted) {
-        return <>{children}</>;
-    }
+    const themeToUse = mounted ? theme : createTheme({});
 
     return (
-        <MuiThemeProvider theme={theme}>
+        <MuiThemeProvider theme={themeToUse}>
             <CssBaseline />
             {children}
         </MuiThemeProvider>

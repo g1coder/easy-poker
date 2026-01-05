@@ -8,16 +8,20 @@ import {
     Typography,
     Container,
     CircularProgress,
+    Checkbox,
+    FormControlLabel,
 } from "@mui/material";
+import { api, Room } from "@/api";
+import { useRouter } from "next/navigation";
+import PersonOffOutlined from "@mui/icons-material/PersonOffOutlined";
+import PersonOutlined from "@mui/icons-material/PersonOutlined";
 
-interface CreateRoomProps {
-    onRoomCreated: (roomId: string, roomName: string, userId: string) => void;
-}
-
-export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
+export const CreateRoom = () => {
     const [roomName, setRoomName] = useState("");
     const [ownerName, setOwnerName] = useState("");
+    const [skipVote, setSkipVote] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
+    const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,30 +30,14 @@ export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
         setIsCreating(true);
 
         try {
-            const roomId = `room-${Date.now()}-${Math.random().toString(36)}`;
-
-            const response = await fetch("/api/rooms", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    roomId,
-                    roomName: roomName.trim(),
-                    ownerName: ownerName.trim(),
-                    cards: [0, 1, 2, 3, 5, 8, 13, 21, Infinity],
-                }),
+            const response = await api.post<Room>("/rooms", {
+                roomName: roomName.trim(),
+                ownerName: ownerName.trim(),
+                skipVote,
             });
 
-            const data = await response.json();
-
-            if (data.success) {
-                onRoomCreated(roomId, roomName.trim(), data.userId);
-            } else {
-                alert("Error creating room: " + data.error);
-            }
-        } catch (error) {
-            console.error("Error creating room:", error);
+            router.push(`/${response.id}`);
+        } catch (_) {
             alert("Error creating room");
         } finally {
             setIsCreating(false);
@@ -98,6 +86,31 @@ export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
                         placeholder="Enter room name"
                     />
 
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                checked={skipVote}
+                                onChange={(event) => {
+                                    setSkipVote(event.target.checked);
+                                }}
+                                color={skipVote ? "warning" : "primary"}
+                                icon={<PersonOutlined />}
+                                checkedIcon={<PersonOffOutlined />}
+                            />
+                        }
+                        label={
+                            <Typography
+                                variant="body2"
+                                fontWeight={500}
+                                color={skipVote ? "error" : "primary"}
+                            >
+                                {skipVote
+                                    ? "Owner will not vote"
+                                    : "Owner can vote"}
+                            </Typography>
+                        }
+                    />
+
                     <Button
                         fullWidth
                         type="submit"
@@ -121,4 +134,4 @@ export default function CreateRoom({ onRoomCreated }: CreateRoomProps) {
             </Box>
         </Container>
     );
-}
+};

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { roomManager } from "@/lib/rooms";
-import { sendToRoom } from "@/app/api/events/route";
+import { sendHidedTaskToRoom } from "@/app/api/events/route";
+import { roomStore, userStore } from "@/api";
+import { getUserTokenOrError } from "@api/helpers";
 
 export async function POST(
     request: NextRequest,
@@ -8,16 +9,20 @@ export async function POST(
 ) {
     try {
         const { roomId } = await params;
-        const { userId, vote } = await request.json();
+        const { vote, taskId } = await request.json();
 
-        if (!userId || vote === undefined) {
+        const token = await getUserTokenOrError();
+        const user = userStore.getUser(token as string);
+
+        if (!user) {
             return NextResponse.json(
-                { error: "User ID and vote are required" },
-                { status: 400 }
+                { error: "User not found" },
+                { status: 404 }
             );
         }
 
-        const success = roomManager.submitVote(roomId, userId, vote);
+        const success = roomStore.submitVote(roomId, user, taskId, vote);
+
         if (!success) {
             return NextResponse.json(
                 { error: "Cannot submit vote" },
@@ -25,19 +30,9 @@ export async function POST(
             );
         }
 
-        const room = roomManager.getRoom(roomId);
-        const roomUsers = roomManager.getRoomUsers(roomId);
+        const tasks = roomStore.getRoomTasks(roomId);
 
-        // Уведомляем о новом голосе
-        sendToRoom(roomId, {
-            type: "vote-received",
-            data: {
-                room,
-                users: roomUsers,
-                votedUserId: userId,
-            },
-            timestamp: new Date().toISOString(),
-        });
+        sendHidedTaskToRoom(roomId, { type: "user.voted", data: { tasks } });
 
         return NextResponse.json({ success: true });
     } catch (error) {
