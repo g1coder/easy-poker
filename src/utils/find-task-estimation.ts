@@ -3,9 +3,10 @@ const MIN_USERS = 5;
 export const findTaskEstimation = (
     votes: Record<string, string>, // userId -> оценка
     users: string[],
+    isOwnerVoting: boolean,
     ignoreQuorum = false
 ) => {
-    const totalUsers = users.length;
+    const totalUsers = users.length - (isOwnerVoting ? 0 : 1);
     const majorityThreshold = Math.ceil(totalUsers / 2); // > 50%
 
     // 2. Собираем только валидные голоса
@@ -13,8 +14,8 @@ export const findTaskEstimation = (
         .map((userId) => votes[userId])
         .filter((vote) => vote && vote.trim().length > 0);
 
-    // 3. Проверяем, что есть достаточное количество голосов
-    if (userVotes.length < majorityThreshold) {
+    // 3. Проверяем, что есть достаточное количество голосов или если игнорим кворум
+    if (!ignoreQuorum && userVotes.length < majorityThreshold) {
         return null;
     }
 
@@ -40,8 +41,7 @@ export const findTaskEstimation = (
         const numericVotes = users
             .map((userId) => Number(votes[userId] || ""))
             .filter((vote) => !isNaN(vote));
-        const sum = numericVotes.reduce((a, b) => a + b, 0);
-        return Math.round(sum / numericVotes.length);
+        return findMostFrequent(numericVotes);
     }
 
     // 6. Проверяем условие большинства
@@ -51,3 +51,22 @@ export const findTaskEstimation = (
 
     return null;
 };
+
+function findMostFrequent(arr: number[]) {
+    const frequencyMap = new Map();
+    for (const num of arr) {
+        frequencyMap.set(num, (frequencyMap.get(num) || 0) + 1);
+    }
+    const maxCount = Math.max(...frequencyMap.values());
+
+    const mostFrequentNumbers: number[] = [];
+    for (const [num, count] of frequencyMap) {
+        if (count === maxCount) {
+            mostFrequentNumbers.push(num);
+        }
+    }
+
+    return mostFrequentNumbers.length === 1
+        ? String(mostFrequentNumbers[0])
+        : null;
+}

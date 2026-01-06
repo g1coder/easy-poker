@@ -131,7 +131,13 @@ class RoomStore {
 
     submitVote(roomId: string, user: User, taskId: string, vote: string) {
         const task = this.getRoomTask(roomId, taskId);
-        if (!task || task?.status === "finished" || task?.status === "revealed")
+        const room = this.getRoom(roomId);
+        if (
+            !room ||
+            !task ||
+            task?.status === "finished" ||
+            task?.status === "revealed"
+        )
             return false;
 
         const users = this.getRoomUsers(roomId);
@@ -141,7 +147,8 @@ class RoomStore {
 
         const estimate = findTaskEstimation(
             task.votes,
-            users.map((u) => u.id)
+            users.map((u) => u.id),
+            !room.skipVote
         );
         if (estimate) {
             task.status = "finished";
@@ -166,6 +173,8 @@ class RoomStore {
     revealVotes(roomId: string, taskId: string) {
         const task = this.getRoomTask(roomId, taskId);
         if (!task) return false;
+        const room = this.getRoom(roomId);
+        if (!room) return false;
 
         task.status = "revealed";
 
@@ -174,6 +183,7 @@ class RoomStore {
             task.estimate = findTaskEstimation(
                 task.votes,
                 users.map((u) => u.id),
+                !room.skipVote,
                 true
             );
         }
