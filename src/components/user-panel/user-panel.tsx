@@ -1,10 +1,9 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { useContextSelector } from "use-context-selector";
 import { ParticipantCard } from "./user-card";
 import { RoomContext } from "@/providers/room-provider";
 import { RoomDto } from "@/api";
 import { CurrentTaskContext } from "@/providers";
-import { useEffect } from "react";
 
 interface UsersPanelProps {
     room: RoomDto;
@@ -13,7 +12,7 @@ interface UsersPanelProps {
 export const UsersPanel = ({ room }: UsersPanelProps) => {
     // const onlineCount = users.filter((p) => p.connected).length;
     // const votedCount = users.filter((p) => p.voted).length;
-    const left = 0; //onlineCount - votedCount;
+    // const left = 0; //onlineCount - votedCount;
     const task = useContextSelector(CurrentTaskContext, (c) => c.currentTask);
     const users = useContextSelector(RoomContext, (c) => c.users);
 

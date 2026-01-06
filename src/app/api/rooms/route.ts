@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
             cookieStore.set(ACCESS_TOKEN_NAME, user.id, {
                 httpOnly: true,
                 secure: true,
-                expires: new Date(Date.now() + 10 * 60 * 1000),
+                expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
                 sameSite: "lax",
                 path: "/",
             });

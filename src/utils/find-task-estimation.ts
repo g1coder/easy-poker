@@ -35,11 +35,16 @@ export const findTaskEstimation = (
         }
     });
 
-    // 6. Проверяем условие большинства
+    // выдаем average
     if (ignoreQuorum) {
-        return winner;
+        const numericVotes = users
+            .map((userId) => Number(votes[userId] || ""))
+            .filter((vote) => !isNaN(vote));
+        const sum = numericVotes.reduce((a, b) => a + b, 0);
+        return Math.round(sum / numericVotes.length);
     }
 
+    // 6. Проверяем условие большинства
     if (users.length >= MIN_USERS && winner && maxCount >= majorityThreshold) {
         return winner;
     }

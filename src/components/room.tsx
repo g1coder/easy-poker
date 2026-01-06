@@ -41,7 +41,7 @@ export const Room = ({ room }: RoomProps) => {
                     <Grid size="grow">
                         <Paper
                             sx={{
-                                p: 3,
+                                p: 2,
                                 height: "100%",
                                 display: "flex",
                             }}

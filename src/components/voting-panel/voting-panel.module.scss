@@ -1,51 +1,51 @@
 .container {
-  display: flex;
-  flex-direction: row;
-  flex-flow: row wrap;
-  gap: 1rem;
+    display: flex;
+    flex-flow: row wrap;
+    flex-direction: row;
+    gap: 1rem;
 }
 
 .card {
-  width: 100px;
-  height: 140px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
-  overflow: hidden;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  }
-
-  &.selected {
-    border: 2px solid #3b82f6;
-    background: #3b82f6;
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.25);
-
-    &::before {
-      opacity: 1;
-    }
-  }
-
-  &.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    width: 90px;
+    height: 140px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
 
     &:hover {
-      transform: none;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgb(0 0 0 / 15%);
     }
-  }
+
+    &.selected {
+        border: 2px solid #3b82f6;
+        background: #3b82f6;
+        box-shadow: 0 8px 20px rgb(59 130 246 / 25%);
+
+        &::before {
+            opacity: 1;
+        }
+    }
+
+    &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+
+        &:hover {
+            transform: none;
+            box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+        }
+    }
 }
 
 .content {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
 }

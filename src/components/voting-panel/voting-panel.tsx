@@ -9,7 +9,7 @@ interface VotingPanelProps {
     room: RoomDto;
 }
 
-const votes: string[] = ["1", "2", "3", "5", "8", "13", "21", "34"];
+const votes: string[] = ["1", "2", "3", "5", "8", "13", "21", "34", "55"];
 
 export const VotingPanel = ({ room }: VotingPanelProps) => {
     const { id: roomId, userId } = room;

@@ -27,7 +27,7 @@ const RoomPage = () => {
         <Box
             sx={{
                 flexGrow: 1,
-                p: 3,
+                p: 2,
                 height: "100vh",
                 backgroundColor: "#f5f5f5",
                 margin: "0 auto",
