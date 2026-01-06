@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GetRoomRequest, Room, RoomDto, userStore } from "@/api";
-import { getRoomOrError, getUserTokenOrError } from "@api/helpers";
+import { GetRoomRequest, RoomDto, roomStore, userStore } from "@/api";
+import { getUserToken } from "@api/helpers";
 
 export async function GET(
     _: NextRequest,
@@ -16,8 +16,21 @@ export async function GET(
             );
         }
 
-        const { ownerId, ...rest } = getRoomOrError(roomId) as Room;
-        const token = await getUserTokenOrError();
+        const room = roomStore.getRoom(roomId);
+        if (!room) {
+            return NextResponse.json(
+                { error: "Room not found" },
+                { status: 404 }
+            );
+        }
+
+        const token = await getUserToken();
+        if (!token) {
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 403 }
+            );
+        }
         const user = userStore.getUser(token as string);
 
         if (!user) {
@@ -26,6 +39,8 @@ export async function GET(
                 { status: 403 }
             );
         }
+
+        const { ownerId, ...rest } = room;
 
         const response: RoomDto = {
             ...rest,

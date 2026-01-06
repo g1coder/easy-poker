@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendToRoom } from "@/app/api/events/route";
-import { Room, roomStore, userStore } from "@/api";
-import {
-    checkIsOwnerOrError,
-    getRoomOrError,
-    getUserTokenOrError,
-} from "@api/helpers";
+import { roomStore, userStore } from "@/api";
+import { getUserToken } from "@api/helpers";
 
 export async function POST(
     request: NextRequest,
@@ -15,11 +11,28 @@ export async function POST(
         const { roomId } = await params;
         const { tasks } = await request.json();
 
-        const token = await getUserTokenOrError();
+        const token = await getUserToken();
+        if (!token) {
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 403 }
+            );
+        }
         const user = userStore.getUser(token as string);
-        const room = getRoomOrError(roomId) as Room;
+        const room = roomStore.getRoom(roomId);
+        if (!room) {
+            return NextResponse.json(
+                { error: "Room not found" },
+                { status: 404 }
+            );
+        }
 
-        checkIsOwnerOrError(room, user?.id);
+        if (room.ownerId !== user?.id) {
+            return NextResponse.json(
+                { error: "User is not owner" },
+                { status: 403 }
+            );
+        }
 
         roomStore.addTasks(roomId, tasks);
 

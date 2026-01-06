@@ -1,11 +1,7 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { roomStore, userStore } from "@/api";
 import { PokerEvent } from "@/api/types";
-import {
-    getRoomOrError,
-    getUserTokenOrError,
-    hideTaskVotes,
-} from "@api/helpers";
+import { getUserToken, hideTaskVotes } from "@api/helpers";
 
 const clients = new Map<
     string,
@@ -18,14 +14,22 @@ const clients = new Map<
 
 export async function GET(request: NextRequest) {
     const roomId = request.nextUrl.searchParams.get("roomId");
-    const token = await getUserTokenOrError();
-    const userId = userStore.getUser(token as string)?.id as string;
+    const token = await getUserToken();
+    if (!token) {
+        return NextResponse.json({ error: "User not found" }, { status: 403 });
+    }
 
-    if (!roomId) {
+    const userId = userStore.getUser(token as string)?.id;
+
+    if (!roomId || !userId) {
         return new Response("roomId not found", { status: 404 });
     }
 
-    getRoomOrError(roomId);
+    const room = roomStore.getRoom(roomId);
+    if (!room) {
+        return NextResponse.json({ error: "Room not found" }, { status: 404 });
+    }
+
     userStore.setUserConnection(userId, true);
 
     const stream = new ReadableStream({

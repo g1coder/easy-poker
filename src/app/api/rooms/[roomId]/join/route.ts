@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { sendHidedTaskToRoom } from "@/app/api/events/route";
 import { ACCESS_TOKEN_NAME, roomStore, userStore } from "@/api";
-import { getRoomOrError } from "@api/helpers";
 
 export async function POST(
     request: NextRequest,
@@ -24,7 +23,13 @@ export async function POST(
             );
         }
 
-        getRoomOrError(roomId);
+        const room = roomStore.getRoom(roomId);
+        if (!room) {
+            return NextResponse.json(
+                { error: "Room not found" },
+                { status: 404 }
+            );
+        }
 
         let user = accessToken ? userStore.getUser(accessToken.value) : null;
         if (!user) {

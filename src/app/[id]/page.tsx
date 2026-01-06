@@ -17,7 +17,8 @@ const RoomPage = () => {
             try {
                 const response = await api.get(`/rooms/${roomId}`);
                 setRoom(response);
-            } catch (_) {
+            } catch (error) {
+                console.log("err", error);
                 router.push(`/${roomId}/join`);
             }
         })();

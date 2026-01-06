@@ -1,17 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendToRoom } from "@/app/api/events/route";
-import {
-    PokerEvent,
-    Room,
-    roomStore,
-    userStore,
-    VoteControlAction,
-} from "@/api";
-import {
-    checkIsOwnerOrError,
-    getRoomOrError,
-    getUserTokenOrError,
-} from "@api/helpers";
+import { PokerEvent, roomStore, userStore, VoteControlAction } from "@/api";
+import { getUserToken } from "@api/helpers";
 
 export async function POST(
     request: NextRequest,
@@ -21,11 +11,28 @@ export async function POST(
         const { roomId } = await params;
         const { action, taskId } = await request.json();
 
-        const token = await getUserTokenOrError();
-        const room = getRoomOrError(roomId) as Room;
+        const token = await getUserToken();
+        if (!token) {
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 403 }
+            );
+        }
+        const room = roomStore.getRoom(roomId);
+        if (!room) {
+            return NextResponse.json(
+                { error: "Room not found" },
+                { status: 404 }
+            );
+        }
         const user = userStore.getUser(token as string);
 
-        checkIsOwnerOrError(room, user?.id);
+        if (room.ownerId !== user?.id) {
+            return NextResponse.json(
+                { error: "User is not owner" },
+                { status: 403 }
+            );
+        }
 
         let eventType: PokerEvent["type"] = "ping";
         let success = false;

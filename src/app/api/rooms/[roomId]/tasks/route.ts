@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Room, roomStore, userStore } from "@/api";
-import {
-    checkIsOwnerOrError,
-    getRoomOrError,
-    getUserTokenOrError,
-    hideTaskVotes,
-} from "@api/helpers";
+import { roomStore, userStore } from "@/api";
+import { getUserToken, hideTaskVotes } from "@api/helpers";
 
 export async function GET(
     _: NextRequest,
@@ -14,11 +9,28 @@ export async function GET(
     try {
         const { roomId } = await params;
 
-        const token = await getUserTokenOrError();
-        const room = getRoomOrError(roomId) as Room;
+        const token = await getUserToken();
+        if (!token) {
+            return NextResponse.json(
+                { error: "User not found" },
+                { status: 403 }
+            );
+        }
+        const room = roomStore.getRoom(roomId);
+        if (!room) {
+            return NextResponse.json(
+                { error: "Room not found" },
+                { status: 404 }
+            );
+        }
         const user = userStore.getUser(token as string);
 
-        checkIsOwnerOrError(room, user?.id);
+        if (room.ownerId !== user?.id) {
+            return NextResponse.json(
+                { error: "User is not owner" },
+                { status: 403 }
+            );
+        }
 
         const tasks = hideTaskVotes(roomStore.getRoomTasks(roomId), user?.id);
 
