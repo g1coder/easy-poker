@@ -2,7 +2,7 @@ import { Box, Stack } from "@mui/material";
 import { useContextSelector } from "use-context-selector";
 import { ParticipantCard } from "./user-card";
 import { RoomContext } from "@/providers/room-provider";
-import { RoomDto } from "@/api";
+import { api, RoomDto } from "@/api";
 import { CurrentTaskContext } from "@/providers";
 
 interface UsersPanelProps {
@@ -24,6 +24,16 @@ export const UsersPanel = ({ room }: UsersPanelProps) => {
             voted: !!vote,
         };
     });
+
+    const handleDelete = async (userId: string) => {
+        try {
+            await api.post(`/rooms/${room.id}/delete-user`, {
+                userId,
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <Box
@@ -50,18 +60,26 @@ export const UsersPanel = ({ room }: UsersPanelProps) => {
             {/*</Stack>*/}
 
             <Stack direction="row" flexWrap="wrap" maxWidth="1000px" gap={4}>
-                {_users?.map((item, idx) => (
-                    <ParticipantCard
-                        key={item.user.id}
-                        {...item}
-                        own={room.userId === item.user.id}
-                        skipVote={idx === 0 && room.skipVote}
-                        reveal={
-                            task?.status === "finished" ||
-                            task?.status === "revealed"
-                        }
-                    />
-                ))}
+                {_users?.map((item, idx) => {
+                    const onDelete =
+                        idx !== 0 && room.isOwner
+                            ? () => handleDelete(item.user.id)
+                            : undefined;
+
+                    return (
+                        <ParticipantCard
+                            key={item.user.id}
+                            {...item}
+                            own={room.userId === item.user.id}
+                            skipVote={idx === 0 && room.skipVote}
+                            reveal={
+                                task?.status === "finished" ||
+                                task?.status === "revealed"
+                            }
+                            onDelete={onDelete}
+                        />
+                    );
+                })}
             </Stack>
         </Box>
     );

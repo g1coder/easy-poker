@@ -86,16 +86,6 @@ export const VotingControl = ({ room }: VotingPanelProps) => {
                                 </Button>
                             )}
                         </Box>
-                        {/*<Tooltip title="Freeze voting">*/}
-                        {/*    <Button*/}
-                        {/*        variant={"outlined"}*/}
-                        {/*        color={isFinished ? "error" : "primary"}*/}
-                        {/*        startIcon={!isFinished && <DoneIcon />}*/}
-                        {/*        onClick={isFinished ? handleReset : handleFinish}*/}
-                        {/*    >*/}
-                        {/*        {isFinished ? "Re-voiting" : "Done"}*/}
-                        {/*    </Button>*/}
-                        {/*</Tooltip>*/}
                     </Stack>
                 </>
             )}

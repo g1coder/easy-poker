@@ -16,7 +16,7 @@ export const Room = ({ room }: RoomProps) => {
     const skipVoting = !(room.isOwner && room.skipVote);
 
     return (
-        <RoomProvider roomId={room.id}>
+        <RoomProvider room={room}>
             <CurrentTaskProvider>
                 <RoomHeader title={room.name} />
                 <Grid

@@ -1,10 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { Room, User, Task } from "../types";
 import { findTaskEstimation } from "@utils/find-task-estimation";
+import { RoomDto } from "@/api";
 
 class RoomStore {
     private rooms: Map<string, Room> = new Map();
     private roomTasks: Map<string, Task[]> = new Map();
+
+    constructor() {
+        this.rooms = new Map();
+        this.roomTasks = new Map();
+    }
 
     createRoom(
         roomName: string,
@@ -16,13 +22,21 @@ class RoomStore {
             id: roomId,
             name: roomName,
             ownerId: owner.id,
-            status: "waiting",
             users: [owner],
             skipVote: options?.skipVote ?? false,
         };
 
         this.rooms.set(roomId, room);
         return room;
+    }
+
+    restoreRoom(room: RoomDto, tasks: Task[]): Room {
+        const newRoom = { ...room, ownerId: room.userId };
+
+        this.rooms.set(room.id, newRoom);
+        this.roomTasks.set(room.id, tasks);
+
+        return newRoom;
     }
 
     getRoom(roomId: string) {
@@ -97,13 +111,22 @@ class RoomStore {
         }
     }
 
-    getRoomUsers(roomId: string, connected = true): User[] {
+    deleteUser(roomId: string, userId: User["id"]) {
         const room = this.getRoom(roomId);
         if (!room) {
             throw new Error("Room not found");
         }
 
-        return room.users.filter((user) => user.connected === connected);
+        room.users = room.users.filter((user) => user.id === userId);
+    }
+
+    getRoomUsers(roomId: string): User[] {
+        const room = this.getRoom(roomId);
+        if (!room) {
+            throw new Error("Room not found");
+        }
+
+        return room.users; //.filter((user) => user.connected === connected);
     }
 
     submitVote(roomId: string, user: User, taskId: string, vote: string) {

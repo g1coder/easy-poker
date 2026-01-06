@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { PokerEvent, User } from "@/api/types";
-import { TaskDto } from "@/api";
+import { PokerEvent, Room, User } from "@/api/types";
+import { RoomDto, TaskDto } from "@/api";
+import { saveRoom } from "@utils/save-room";
 
 interface UseRoomOptions {
-    roomId: string;
+    room: RoomDto;
 }
 
 export const useRoom = (options: UseRoomOptions) => {
@@ -12,11 +13,11 @@ export const useRoom = (options: UseRoomOptions) => {
     const [isConnected, setIsConnected] = useState(false);
 
     const eventSourceRef = useRef<EventSource | null>(null);
-    const optionsRef = useRef(options);
+    const optionsRef = useRef<string>(options.room.id);
     const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
-        optionsRef.current = options;
+        optionsRef.current = options.room.id;
     }, [options]);
 
     const connectSSE = useCallback(() => {
@@ -30,7 +31,7 @@ export const useRoom = (options: UseRoomOptions) => {
         }
 
         const params = new URLSearchParams({
-            roomId: optionsRef.current.roomId,
+            roomId: optionsRef.current,
         });
 
         const url = `/api/events?${params.toString()}`;
@@ -63,6 +64,16 @@ export const useRoom = (options: UseRoomOptions) => {
                         case "task.reset":
                         case "task.done":
                             setTasks(pokerEvent.data.tasks);
+                            if (options.room.isOwner) {
+                                try {
+                                    saveRoom(
+                                        options.room as unknown as Room,
+                                        pokerEvent.data.tasks
+                                    );
+                                } catch (error) {
+                                    console.error(error);
+                                }
+                            }
                     }
                 } catch (error) {
                     console.error("Error parsing poker event:", error);

@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import DoneIcon from "@mui/icons-material/Done";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import DeleteOutlined from "@mui/icons-material/DeleteOutlined";
 import { User } from "@/api";
 import styles from "./user-card.module.scss";
 
@@ -12,6 +13,7 @@ interface ParticipantCardProps {
     own: boolean;
     reveal: boolean;
     skipVote: boolean;
+    onDelete?: () => Promise<void>;
 }
 
 export const ParticipantCard = ({
@@ -21,6 +23,7 @@ export const ParticipantCard = ({
     own,
     reveal,
     skipVote,
+    onDelete,
 }: ParticipantCardProps) => {
     const { name, connected } = user;
 
@@ -58,6 +61,11 @@ export const ParticipantCard = ({
     return (
         <Stack alignItems="center" spacing={1}>
             <Box className={styles.card} p={1}>
+                {onDelete && (
+                    <Box className={styles.delete} onClick={onDelete}>
+                        <DeleteOutlined color="error" />
+                    </Box>
+                )}
                 {renderContent()}
                 {own && (
                     <Typography className={styles.you} variant="body1">

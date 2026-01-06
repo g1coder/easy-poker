@@ -1,3 +1,5 @@
+import { User } from "@/api";
+
 export interface GetRoomRequest {
     roomId: string;
 }
@@ -8,8 +10,9 @@ export interface JoinRoomResponse {
 
 export interface RoomDto {
     id: string;
-    name: string;
     isOwner: boolean;
+    name: string;
     userId: string;
     skipVote: boolean;
+    users: User[];
 }

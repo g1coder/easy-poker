@@ -42,6 +42,8 @@ export async function GET(
 
         const { ownerId, ...rest } = room;
 
+        console.log("==> GET RES", ownerId, user.id);
+
         const response: RoomDto = {
             ...rest,
             userId: user.id,

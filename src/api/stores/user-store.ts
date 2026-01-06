@@ -10,6 +10,10 @@ const generateToken = () => {
 class UserStore {
     #userSessionMap: Map<string, User> = new Map();
 
+    constructor() {
+        this.#userSessionMap = new Map();
+    }
+
     public createUser(userName: string) {
         const token = generateToken();
         const user: User = {
@@ -21,8 +25,16 @@ class UserStore {
         return user;
     }
 
+    public restoreUser(user: User) {
+        this.#userSessionMap.set(user.id, user);
+    }
+
     public getUser(token: string) {
         return this.#userSessionMap.get(token) || null;
+    }
+
+    public deleteUser(token: string) {
+        return this.#userSessionMap.delete(token);
     }
 
     public setUserConnection(userId: string, connected: boolean) {

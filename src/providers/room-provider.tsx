@@ -2,7 +2,7 @@
 
 import { createContext } from "use-context-selector";
 import { FC, PropsWithChildren } from "react";
-import { TaskDto, User } from "@/api";
+import { RoomDto, TaskDto, User } from "@/api";
 import { useRoom } from "@/hooks/use-room";
 
 export interface RoomContext {
@@ -15,11 +15,11 @@ export const RoomContext = createContext<RoomContext>({
     tasks: [],
 });
 
-export const RoomProvider: FC<PropsWithChildren<{ roomId: string }>> = ({
-    roomId,
+export const RoomProvider: FC<PropsWithChildren<{ room: RoomDto }>> = ({
+    room,
     children,
 }) => {
-    const { users, tasks } = useRoom({ roomId });
+    const { users, tasks } = useRoom({ room });
 
     return (
         <RoomContext.Provider value={{ users, tasks }}>

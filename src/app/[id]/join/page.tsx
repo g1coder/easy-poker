@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Container } from "@mui/material";
 import { JoinRoom } from "@components/join-room";
+import { Container } from "@mui/material";
 
 export default function JoinRoomPage() {
     const params = useParams<{ id: string }>();
@@ -10,13 +10,15 @@ export default function JoinRoomPage() {
 
     return (
         <Container
+            maxWidth="sm"
             sx={{
                 display: "flex",
                 alignItems: "center",
-                height: "100%",
+                justifyContent: "center",
+                minHeight: "100%",
             }}
         >
-            <JoinRoom roomId={id} />
+            <JoinRoom roomId={id} />;
         </Container>
     );
 }
