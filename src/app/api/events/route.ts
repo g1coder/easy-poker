@@ -43,14 +43,15 @@ export async function GET(request: NextRequest) {
             });
 
             console.log(`🔗 SSE connected: ${clientId}`);
+            const tasks = roomStore.getRoomTasks(roomId);
 
             const initialEvent: PokerEvent = {
                 type: "user.joined",
                 data: {
-                    tasks: hideTaskVotes(
-                        roomStore.getRoomTasks(roomId),
-                        userId
-                    ),
+                    tasks:
+                        userId === room.ownerId
+                            ? tasks
+                            : hideTaskVotes(tasks, userId),
                     users: roomStore.getRoomUsers(roomId),
                 },
             };
@@ -131,16 +132,23 @@ export function sendToRoom(roomId: string, event: PokerEvent) {
     );
 }
 
-export function sendHidedTaskToRoom(roomId: string, event: PokerEvent) {
+export function sendHidedTaskToRoom(
+    roomId: string,
+    event: PokerEvent,
+    ownerId?: string
+) {
     let sentCount = 0;
 
     clients.forEach((client, clientId) => {
         if (client.roomId === roomId) {
+            const isOwner = client.userId === ownerId;
             const payload = {
                 ...event,
                 data: {
                     ...event.data,
-                    tasks: hideTaskVotes(event.data.tasks, client.userId),
+                    tasks: isOwner
+                        ? event.data.tasks
+                        : hideTaskVotes(event.data.tasks, client.userId),
                 },
                 timestamp: new Date().toISOString(),
             };

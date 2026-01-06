@@ -37,8 +37,13 @@ export async function POST(
         }
 
         const tasks = roomStore.getRoomTasks(roomId);
+        const room = roomStore.getRoom(roomId);
 
-        sendHidedTaskToRoom(roomId, { type: "user.voted", data: { tasks } });
+        sendHidedTaskToRoom(
+            roomId,
+            { type: "user.voted", data: { tasks } },
+            room?.ownerId
+        );
 
         return NextResponse.json({ success: true });
     } catch (error) {

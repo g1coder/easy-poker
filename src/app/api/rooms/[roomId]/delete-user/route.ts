@@ -35,13 +35,17 @@ export async function POST(
 
         roomStore.deleteUser(roomId, userId);
 
-        sendHidedTaskToRoom(roomId, {
-            type: "user.joined",
-            data: {
-                tasks: roomStore.getRoomTasks(roomId),
-                users: roomStore.getRoomUsers(roomId),
+        sendHidedTaskToRoom(
+            roomId,
+            {
+                type: "user.joined",
+                data: {
+                    tasks: roomStore.getRoomTasks(roomId),
+                    users: roomStore.getRoomUsers(roomId),
+                },
             },
-        });
+            room.ownerId
+        );
 
         return NextResponse.json({ success: true }, { status: 201 });
     } catch (error) {
