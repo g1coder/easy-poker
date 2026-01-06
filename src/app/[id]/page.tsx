@@ -29,7 +29,10 @@ const RoomPage = () => {
                 const response = await api.get(`/rooms/${roomId}`);
                 setRoom(response);
             } catch (error) {
-                if (error instanceof AxiosError && error.status === 404) {
+                if (
+                    error instanceof AxiosError &&
+                    (error.status === 403 || error.status === 404)
+                ) {
                     setNotFound(true);
                     const isCopyExist = !!restoreRoom(roomId);
                     setCanRestore(isCopyExist);
