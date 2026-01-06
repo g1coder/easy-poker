@@ -66,7 +66,5 @@ function findMostFrequent(arr: number[]) {
         }
     }
 
-    return mostFrequentNumbers.length === 1
-        ? String(mostFrequentNumbers[0])
-        : null;
+    return mostFrequentNumbers.length === 1 ? mostFrequentNumbers[0] : null;
 }
