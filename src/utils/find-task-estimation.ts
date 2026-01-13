@@ -1,4 +1,4 @@
-const MIN_USERS = 3;
+const MIN_USERS = 5;
 
 export const findTaskEstimation = (
     votes: Record<string, string>, // userId -> оценка
