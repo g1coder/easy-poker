@@ -86,6 +86,9 @@ export const VotingControl = ({ room }: VotingPanelProps) => {
                                 </Button>
                             )}
                         </Box>
+                        <Button variant="outlined" color="primary">
+                            Send to YouTrack
+                        </Button>
                     </Stack>
                 </>
             )}
