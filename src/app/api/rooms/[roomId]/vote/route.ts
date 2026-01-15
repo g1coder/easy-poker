@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendHidedTaskToRoom } from "@/app/api/events/route";
-import { roomStore, userStore } from "@/api";
+import { roomStore } from "@/api";
 import { getUserToken } from "@api/helpers";
 
 export async function POST(
@@ -18,7 +18,7 @@ export async function POST(
                 { status: 403 }
             );
         }
-        const user = userStore.getUser(token as string);
+        const user = roomStore.getUser(token as string);
 
         if (!user) {
             return NextResponse.json(
@@ -42,7 +42,10 @@ export async function POST(
         sendHidedTaskToRoom(
             roomId,
             { type: "user.voted", data: { tasks } },
-            room?.ownerId
+            room?.ownerId,
+            {
+                users: room?.users || [],
+            }
         );
 
         return NextResponse.json({ success: true });

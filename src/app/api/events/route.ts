@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { roomStore, userStore } from "@/api";
+import { roomStore } from "@/api";
 import { PokerEvent } from "@/api/types";
 import { getUserToken, hideTaskVotes } from "@api/helpers";
 
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "User not found" }, { status: 403 });
     }
 
-    const userId = userStore.getUser(token as string)?.id;
+    const userId = roomStore.getUser(token as string)?.id;
 
     if (!roomId || !userId) {
         return new Response("roomId not found", { status: 404 });
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    userStore.setUserConnection(userId, true);
+    roomStore.setUserConnection(userId, true);
 
     const stream = new ReadableStream({
         start(controller) {
@@ -78,14 +78,14 @@ export async function GET(request: NextRequest) {
                 console.log(`🔴 SSE disconnected: ${clientId}`);
                 clearInterval(pingInterval);
                 clients.delete(clientId);
-                userStore.setUserConnection(userId, false);
+                roomStore.setUserConnection(userId, false);
             });
         },
 
         cancel() {
             console.log(`❌ SSE stream cancelled for user ${userId}`);
             clients.delete(`${roomId}-${userId}`);
-            userStore.setUserConnection(userId, false);
+            roomStore.setUserConnection(userId, false);
         },
     });
 
@@ -135,7 +135,8 @@ export function sendToRoom(roomId: string, event: PokerEvent) {
 export function sendHidedTaskToRoom(
     roomId: string,
     event: PokerEvent,
-    ownerId?: string
+    ownerId?: string,
+    ownerData = {}
 ) {
     let sentCount = 0;
 
@@ -146,6 +147,7 @@ export function sendHidedTaskToRoom(
                 ...event,
                 data: {
                     ...event.data,
+                    ...(isOwner && ownerData),
                     tasks: isOwner
                         ? event.data.tasks
                         : hideTaskVotes(event.data.tasks, client.userId),

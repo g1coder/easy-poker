@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { sendHidedTaskToRoom } from "@/app/api/events/route";
-import { ACCESS_TOKEN_NAME, roomStore, userStore } from "@/api";
+import { ACCESS_TOKEN_NAME, roomStore } from "@/api";
 
 export async function POST(
     request: NextRequest,
@@ -31,9 +31,9 @@ export async function POST(
             );
         }
 
-        let user = accessToken ? userStore.getUser(accessToken.value) : null;
+        let user = accessToken ? roomStore.getUser(accessToken.value) : null;
         if (!user) {
-            user = userStore.createUser(userName);
+            user = roomStore.createUser(userName);
 
             cookieStore.set(ACCESS_TOKEN_NAME, user.id, {
                 httpOnly: true,

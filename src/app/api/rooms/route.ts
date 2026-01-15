@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { ACCESS_TOKEN_NAME, roomStore, userStore } from "@/api";
+import { ACCESS_TOKEN_NAME, roomStore } from "@/api";
 import { hideTaskVotes } from "@api/helpers";
 
 export async function POST(request: NextRequest) {
@@ -19,9 +19,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        let user = accessToken ? userStore.getUser(accessToken.value) : null;
+        let user = accessToken ? roomStore.getUser(accessToken.value) : null;
         if (!user) {
-            user = userStore.createUser(ownerName);
+            user = roomStore.createUser(ownerName);
             cookieStore.set(ACCESS_TOKEN_NAME, user.id, {
                 httpOnly: true,
                 secure: true,

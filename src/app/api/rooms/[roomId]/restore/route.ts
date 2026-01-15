@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import {
-    ACCESS_TOKEN_NAME,
-    RoomDto,
-    roomStore,
-    TaskDto,
-    userStore,
-} from "@/api";
+import { ACCESS_TOKEN_NAME, RoomDto, roomStore, TaskDto } from "@/api";
 
 export async function POST(
     request: NextRequest,
@@ -30,14 +24,6 @@ export async function POST(
                 { status: 400 }
             );
         }
-
-        console.log("start", room.users);
-
-        room.users.forEach((user) => {
-            userStore.restoreUser(user);
-        });
-
-        console.log("restoreRoom", room, tasks);
 
         const { ownerId, ...rest } = roomStore.restoreRoom(room, tasks);
         const userId = accessToken?.value as string;

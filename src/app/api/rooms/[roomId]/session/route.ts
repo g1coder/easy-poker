@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendToRoom } from "@/app/api/events/route";
-import { PokerEvent, roomStore, userStore, VoteControlAction } from "@/api";
+import { PokerEvent, roomStore, VoteControlAction } from "@/api";
 import { getUserToken } from "@api/helpers";
 
 export async function POST(
@@ -25,7 +25,7 @@ export async function POST(
                 { status: 404 }
             );
         }
-        const user = userStore.getUser(token as string);
+        const user = roomStore.getUser(token as string);
 
         if (room.ownerId !== user?.id) {
             return NextResponse.json(

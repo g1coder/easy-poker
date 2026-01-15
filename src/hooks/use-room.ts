@@ -67,7 +67,10 @@ export const useRoom = (options: UseRoomOptions) => {
                             if (options.room.isOwner) {
                                 try {
                                     saveRoom(
-                                        options.room as unknown as Room,
+                                        {
+                                            ...options.room,
+                                            users: pokerEvent.data.users,
+                                        } as unknown as Room,
                                         pokerEvent.data.tasks
                                     );
                                 } catch (error) {

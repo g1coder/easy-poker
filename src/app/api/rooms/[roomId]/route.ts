@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GetRoomRequest, RoomDto, roomStore, userStore } from "@/api";
+import { GetRoomRequest, RoomDto, roomStore } from "@/api";
 import { getUserToken } from "@api/helpers";
 
 export async function GET(
@@ -31,7 +31,7 @@ export async function GET(
                 { status: 403 }
             );
         }
-        const user = userStore.getUser(token as string);
+        const user = roomStore.getUser(token as string);
 
         if (!user) {
             return NextResponse.json(
@@ -41,8 +41,6 @@ export async function GET(
         }
 
         const { ownerId, ...rest } = room;
-
-        console.log("==> GET RES", ownerId, user.id);
 
         const response: RoomDto = {
             ...rest,

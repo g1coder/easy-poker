@@ -1,15 +1,50 @@
-import { randomUUID } from "node:crypto";
+import { getRandomValues, randomUUID } from "node:crypto";
 import { Room, User, Task } from "../types";
 import { findTaskEstimation } from "@utils/find-task-estimation";
 import { RoomDto } from "@/api";
 
+const generateToken = () => {
+    const arr = new Uint8Array(12);
+    getRandomValues(arr);
+    return Array.from(arr, (v) => v.toString(16).padStart(2, "0")).join("");
+};
+
 class RoomStore {
     private rooms: Map<string, Room> = new Map();
     private roomTasks: Map<string, Task[]> = new Map();
+    private users: Map<string, User> = new Map(); // accessToken -> user
 
     constructor() {
         this.rooms = new Map();
         this.roomTasks = new Map();
+        this.users = new Map();
+    }
+
+    /* users */
+    public getUser(token: string) {
+        return this.users.get(token) || null;
+    }
+
+    public setUserConnection(userId: string, connected: boolean) {
+        const user = this.getUser(userId);
+        if (user) {
+            user.connected = connected;
+        }
+    }
+
+    public createUser(userName: string) {
+        const token = generateToken();
+        const user: User = {
+            id: token,
+            name: userName,
+            connected: true,
+        };
+        this.users.set(token, user);
+        return user;
+    }
+
+    public restoreUser(user: User) {
+        this.users.set(user.id, user);
     }
 
     createRoom(
@@ -35,6 +70,15 @@ class RoomStore {
 
         this.rooms.set(room.id, newRoom);
         this.roomTasks.set(room.id, tasks);
+
+        console.log("===>>> USERS FOR RESTORE", JSON.stringify(room.users));
+
+        room.users.forEach((u) => {
+            this.restoreUser(u);
+        });
+
+        console.log("==========> RESTORED", [...this.users]);
+        console.log("==========> RESTORED ROOM", [...this.rooms]);
 
         return newRoom;
     }

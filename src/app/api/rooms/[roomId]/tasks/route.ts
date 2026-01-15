@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { roomStore, userStore } from "@/api";
+import { roomStore } from "@/api";
 import { getUserToken, hideTaskVotes } from "@api/helpers";
 
 export async function GET(
@@ -23,7 +23,7 @@ export async function GET(
                 { status: 404 }
             );
         }
-        const user = userStore.getUser(token as string);
+        const user = roomStore.getUser(token as string);
 
         if (room.ownerId !== user?.id) {
             return NextResponse.json(
