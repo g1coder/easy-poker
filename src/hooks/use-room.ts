@@ -64,6 +64,11 @@ export const useRoom = (options: UseRoomOptions) => {
                         case "task.reset":
                         case "task.done":
                             setTasks(pokerEvent.data.tasks);
+                            console.log("event", pokerEvent.data);
+
+                            if (pokerEvent.data.users) {
+                                setUsers(pokerEvent.data.users);
+                            }
                             if (options.room.isOwner) {
                                 try {
                                     saveRoom(

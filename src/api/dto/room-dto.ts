@@ -5,7 +5,7 @@ export interface GetRoomRequest {
 }
 
 export interface JoinRoomResponse {
-    roomId: string;
+    name: string;
 }
 
 export interface RoomDto {

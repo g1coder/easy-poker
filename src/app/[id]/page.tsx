@@ -21,7 +21,7 @@ const RoomPage = () => {
     const router = useRouter();
     const [room, setRoom] = useState<RoomDto | null>(null);
     const [notFound, setNotFound] = useState(false);
-    const [canRestore, setCanRestore] = useState(false);
+    const [forRestore, setForRestore] = useState<RoomDto | null>(null);
 
     useEffect(() => {
         (async () => {
@@ -31,8 +31,11 @@ const RoomPage = () => {
             } catch (error) {
                 if (error instanceof AxiosError && error.status === 404) {
                     setNotFound(true);
-                    const isCopyExist = !!restoreRoom(roomId);
-                    setCanRestore(isCopyExist);
+                    const payload = restoreRoom(roomId);
+                    if (payload) {
+                        setForRestore(payload.room);
+                    }
+
                     return;
                 }
 
@@ -44,10 +47,17 @@ const RoomPage = () => {
     const handleRestore = async () => {
         try {
             const data = restoreRoom(roomId);
-            const response = await api.post(`/rooms/${roomId}/restore`, data);
-            setRoom(response);
+            if (data?.room.isOwner) {
+                const response = await api.post(
+                    `/rooms/${roomId}/restore`,
+                    data
+                );
+                setRoom(response);
+            } else {
+                router.push(`/${roomId}/join`);
+            }
         } catch (_) {
-            setCanRestore(false);
+            setForRestore(null);
         }
     };
 
@@ -79,13 +89,15 @@ const RoomPage = () => {
                     Not found
                 </Typography>
                 <Stack gap={2} display="flex">
-                    {canRestore && (
+                    {forRestore && forRestore.isOwner && (
                         <Button
                             variant="contained"
                             size="large"
                             onClick={handleRestore}
                         >
-                            Try restore room
+                            {forRestore.isOwner
+                                ? "Try restore room"
+                                : "Try join"}
                         </Button>
                     )}
 

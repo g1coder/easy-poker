@@ -33,6 +33,8 @@ export async function GET(
         }
         const user = roomStore.getUser(token as string);
 
+        console.log("==>> GOT USER", user);
+
         if (!user) {
             return NextResponse.json(
                 { error: "User not found" },

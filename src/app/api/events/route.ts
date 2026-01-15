@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: "Room not found" }, { status: 404 });
     }
 
-    roomStore.setUserConnection(userId, true);
+    roomStore.setUserConnection(roomId, userId, true);
 
     const stream = new ReadableStream({
         start(controller) {
@@ -78,14 +78,14 @@ export async function GET(request: NextRequest) {
                 console.log(`🔴 SSE disconnected: ${clientId}`);
                 clearInterval(pingInterval);
                 clients.delete(clientId);
-                roomStore.setUserConnection(userId, false);
+                roomStore.setUserConnection(roomId, userId, false);
             });
         },
 
         cancel() {
             console.log(`❌ SSE stream cancelled for user ${userId}`);
             clients.delete(`${roomId}-${userId}`);
-            roomStore.setUserConnection(userId, false);
+            roomStore.setUserConnection(roomId, userId, false);
         },
     });
 

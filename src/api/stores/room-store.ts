@@ -25,8 +25,19 @@ class RoomStore {
         return this.users.get(token) || null;
     }
 
-    public setUserConnection(userId: string, connected: boolean) {
+    public setUserConnection(
+        roomId: string,
+        userId: string,
+        connected: boolean
+    ) {
         const user = this.getUser(userId);
+        const room = this.rooms.get(roomId);
+        if (room) {
+            const roomUser = room.users.find((user) => user.id === userId);
+            if (roomUser) {
+                roomUser.connected = connected;
+            }
+        }
         if (user) {
             user.connected = connected;
         }
@@ -41,10 +52,6 @@ class RoomStore {
         };
         this.users.set(token, user);
         return user;
-    }
-
-    public restoreUser(user: User) {
-        this.users.set(user.id, user);
     }
 
     createRoom(
@@ -66,7 +73,14 @@ class RoomStore {
     }
 
     restoreRoom(room: RoomDto, tasks: Task[]): Room {
-        const newRoom = { ...room, ownerId: room.userId };
+        const newRoom = {
+            ...room,
+            ownerId: room.userId,
+            users: room.users.map((u) => ({
+                ...u,
+                connected: room.userId === u.id,
+            })),
+        };
 
         this.rooms.set(room.id, newRoom);
         this.roomTasks.set(room.id, tasks);
@@ -74,11 +88,10 @@ class RoomStore {
         console.log("===>>> USERS FOR RESTORE", JSON.stringify(room.users));
 
         room.users.forEach((u) => {
-            this.restoreUser(u);
+            this.users.set(u.id, { ...u, connected: room.userId === u.id });
         });
 
-        console.log("==========> RESTORED", [...this.users]);
-        console.log("==========> RESTORED ROOM", [...this.rooms]);
+        console.log("==========> RESTORED users", [...this.users]);
 
         return newRoom;
     }
@@ -150,6 +163,11 @@ class RoomStore {
         const alreadyJoined = room.users.find(
             (already) => already.id === user.id
         );
+
+        if (alreadyJoined?.connected) {
+            alreadyJoined.connected = true;
+        }
+
         if (!alreadyJoined) {
             room.users.push(user);
         }
@@ -170,7 +188,7 @@ class RoomStore {
             throw new Error("Room not found");
         }
 
-        return room.users; //.filter((user) => user.connected === connected);
+        return room.users;
     }
 
     submitVote(roomId: string, user: User, taskId: string, vote: string) {

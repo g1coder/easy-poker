@@ -1,5 +1,6 @@
 import { Box, Container } from "@mui/material";
 import { CreateRoom } from "@components/create-room";
+import { RestoreRoom } from "@components/restore-room";
 
 export default function Home() {
     return (
@@ -13,6 +14,7 @@ export default function Home() {
         >
             <Box sx={{ width: "100%" }}>
                 <CreateRoom />
+                <RestoreRoom />
             </Box>
         </Container>
     );

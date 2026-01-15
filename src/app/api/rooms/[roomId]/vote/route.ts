@@ -28,6 +28,9 @@ export async function POST(
         }
 
         const success = roomStore.submitVote(roomId, user, taskId, vote);
+        if (!user.connected) {
+            roomStore.setUserConnection(roomId, user.id, true);
+        }
 
         if (!success) {
             return NextResponse.json(

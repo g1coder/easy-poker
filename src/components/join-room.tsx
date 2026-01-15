@@ -20,9 +20,24 @@ export const JoinRoom = ({ roomId }: JoinRoomProps) => {
         setIsJoining(true);
 
         try {
-            await api.post<JoinRoomResponse>(`/rooms/${roomId}/join`, {
-                userName: userName.trim(),
-            });
+            const response = await api.post<JoinRoomResponse>(
+                `/rooms/${roomId}/join`,
+                {
+                    userName: userName.trim(),
+                }
+            );
+
+            if (roomId) {
+                localStorage.setItem(
+                    roomId,
+                    JSON.stringify({
+                        room: {
+                            id: roomId,
+                            name: response.name,
+                        },
+                    })
+                );
+            }
 
             router.push(`/${roomId}`);
         } catch (_) {
